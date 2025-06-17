@@ -1,0 +1,88 @@
+@use "../../scss/media_breakpoints.scss" as *;
+
+.welcome-page {
+  height: 100vh;
+  margin: 0;
+  background: linear-gradient(to top right, #000080, #6a0dad);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+
+  .container {
+    background-color: #fff;
+    padding: 40px;
+    border-radius: 16px;
+    box-shadow: 0 6px 24px rgba(0, 0, 50, 0.1);
+    text-align: center;
+    max-width: 400px;
+    width: 90%;
+    border: 1px solid #cce0ff;
+
+    .title {
+      color: #003366;
+      margin-bottom: 20px;
+      font-size: 22px;
+      line-height: 1.4;
+    }
+
+    .description {
+      font-size: 16px;
+      margin-bottom: 30px;
+      color: #1a1a40;
+    }
+
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+
+      .button {
+        flex: 1;
+        padding: 12px 20px;
+        font-size: 16px;
+        border: none;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+      }
+
+      .login {
+        background-color: #0047b3;
+        color: #fff;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+
+        &:hover {
+          background-color: #003080;
+          transform: scale(1.05);
+        }
+      }
+
+      .register {
+        background-color: #3399ff;
+        color: #fff;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+
+        &:hover {
+          background-color: #1a8cff;
+          transform: scale(1.05);
+        }
+      }
+    }
+  }
+}
+
+@include mobile {
+  .container {
+    padding: 20px;
+  }
+
+  .buttons {
+    flex-direction: column;
+
+    .button {
+      width: 100%;
+    }
+  }
+}

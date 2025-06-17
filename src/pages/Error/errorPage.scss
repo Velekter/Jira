@@ -1,0 +1,46 @@
+.error-page {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(to top right, #000080, #6a0dad);
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  animation: fadeIn 0.5s ease-in-out;
+
+  .content {
+    text-align: center;
+    max-width: 400px;
+    padding: 2rem;
+    background-color: #ffffff;
+    border-radius: 16px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+
+    .title {
+      font-size: 6rem;
+      color: #4f46e5;
+      margin-bottom: 1rem;
+    }
+
+    .text {
+      font-size: 1.25rem;
+      color: #334155;
+      margin-bottom: 2rem;
+    }
+
+    .link {
+      font-size: 1rem;
+      text-decoration: none;
+      color: #4f46e5;
+      font-weight: 600;
+      border: 1px solid #4f46e5;
+      padding: 10px 16px;
+      border-radius: 8px;
+      transition: background-color 0.3s ease;
+
+      &:hover {
+        background-color: #4f46e5;
+        color: white;
+      }
+    }
+  }
+}
