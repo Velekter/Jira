@@ -1,10 +1,6 @@
-import { initializeApp } from "firebase/app";
-import {
-  getAuth,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-} from "firebase/auth";
-import { getFirestore, collection, addDoc } from "firebase/firestore";
+import { initializeApp } from 'firebase/app';
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { getFirestore, doc, setDoc } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -20,51 +16,45 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-export const registerUser = async (
-  email: string,
-  password: string,
-  fullName: string
-) => {
+interface RegisterFormData {
+  email: string;
+  password: string;
+  fullName: string;
+}
+
+export const registerUser = async (data: RegisterFormData) => {
+  const { email, password, fullName } = data;
   try {
-    const userCredential = await createUserWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    const usersCollectionRef = collection(db, "users");
-    await addDoc(usersCollectionRef, {
+    const userDocRef = doc(db, 'users', user.uid);
+    await setDoc(userDocRef, {
+      uid: user.uid,
       fullName,
       email,
-      uid: user.uid,
       createdAt: new Date(),
     });
 
     const token = await user.getIdToken();
     localStorage.setItem("token", token);
-
     return { user, token };
   } catch (error) {
-    console.error("Firebase registration error:", error);
-    throw new Error((error as Error)?.message || "Registration failed.");
+    console.error('Firebase registration error:', error);
+    throw error;
   }
 };
 
 export const loginUser = async (email: string, password: string) => {
   try {
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
-      email,
-      password
-    );
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
     const token = await user.getIdToken();
-    localStorage.setItem("token", token);
+    localStorage.setItem('token', token);
 
     return { user, token };
   } catch (error) {
-    throw new Error("Login failed. Please check your credentials.");
+    throw new Error('Login failed. Please check your credentials.');
   }
 };
