@@ -21,7 +21,7 @@ const Register: React.FC = () => {
   >({
     mutationFn: registerUser,
     onSuccess: () => {
-      navigate('/login');
+      navigate('/account');
     },
     onError: (error: Error) => {
       setErrors([error.message]);

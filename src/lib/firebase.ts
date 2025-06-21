@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
-import { getFirestore, doc, setDoc } from 'firebase/firestore';
+import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -37,7 +37,9 @@ export const registerUser = async (data: RegisterFormData) => {
     });
 
     const token = await user.getIdToken();
-    localStorage.setItem("token", token);
+    localStorage.setItem('token', token);
+    localStorage.setItem('userId', user.uid);
+
     return { user, token };
   } catch (error) {
     console.error('Firebase registration error:', error);
@@ -57,4 +59,13 @@ export const loginUser = async (email: string, password: string) => {
   } catch (error) {
     throw new Error('Login failed. Please check your credentials.');
   }
+};
+
+export const fetchUserData = async (uid: string) => {
+  const userDocRef = doc(db, 'users', uid);
+  const docSnap = await getDoc(userDocRef);
+  if (!docSnap.exists()) {
+    throw new Error('User not found');
+  }
+  return docSnap.data();
 };
