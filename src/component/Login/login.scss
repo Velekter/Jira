@@ -5,7 +5,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: "Plus Jakarta Sans";
+  font-family: 'Plus Jakarta Sans';
 
   .container {
     display: flex;
@@ -47,21 +47,47 @@
       background-color: #fff;
       color: black;
       padding-left: 36px;
+      padding-right: 44px;
       border: 1px solid #cbd5e1;
-      margin-bottom: 15px;
 
       &.email {
-        background-image: url("./img/login.svg");
+        background-image: url('./img/login.svg');
         background-size: 20px 20px;
         background-position: 10px center;
         background-repeat: no-repeat;
       }
 
       &.password {
-        background-image: url("./img/password.svg");
+        background-image: url('./img/password.svg');
         background-size: 20px 20px;
         background-position: 10px center;
         background-repeat: no-repeat;
+      }
+    }
+
+    .input-wrapper {
+      position: relative;
+
+      .input.password {
+        width: 90%;
+        padding-right: 44px;
+      }
+
+      .toggle-password {
+        position: absolute;
+        top: 50%;
+        right: 12px;
+        transform: translateY(-50%);
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+
+        img {
+          width: 20px;
+          height: 20px;
+          filter: invert(0.6);
+        }
       }
     }
 
@@ -84,7 +110,9 @@
         text-decoration: none;
         background-color: #4f46e5;
         color: #fff;
-        transition: background-color 0.3s ease, transform 0.3s ease;
+        transition:
+          background-color 0.3s ease,
+          transform 0.3s ease;
 
         &:hover {
           background-color: #003f99;

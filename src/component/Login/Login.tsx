@@ -4,12 +4,14 @@ import { loginUser } from '../../lib/firebase';
 
 import './login.scss';
 import buttonImg from './img/button.png';
-
+import eyeShow from './img/show.svg';
+import eyeHide from './img/hide.svg';
 
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async () => {
@@ -44,17 +46,22 @@ export default function Login() {
           onChange={e => setEmail(e.target.value)}
         />
 
-        <div>
-          <label className="label">Password</label>
+        <label className="label">Password</label>
+        <div className="input-wrapper">
           <input
+            type={showPassword ? 'text' : 'password'}
             className="input password"
             placeholder="password"
-            type="password"
             value={password}
             onChange={e => setPassword(e.target.value)}
           />
-          <button>
-            <img src=''/>
+          <button
+            type="button"
+            className="toggle-password"
+            onClick={() => setShowPassword(prev => !prev)}
+            aria-label="Toggle password visibility"
+          >
+            <img src={showPassword ? eyeHide : eyeShow} alt="Toggle password" />
           </button>
         </div>
 
