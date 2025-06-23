@@ -54,10 +54,11 @@ export const loginUser = async (email: string, password: string) => {
 
     const token = await user.getIdToken();
     localStorage.setItem('token', token);
+    localStorage.setItem('userId', user.uid);
 
     return { user, token };
   } catch (error) {
-    throw new Error('Login failed. Please check your credentials.');
+    throw new Error((error as Error).message || 'Login failed. Please check your credentials.');
   }
 };
 
