@@ -13,3 +13,9 @@ export function checkAuthLoader() {
   }
   return null;
 }
+
+export function logoutUser() {
+  localStorage.removeItem('token');
+  localStorage.removeItem('userId');
+  window.location.href = '/login';
+}
