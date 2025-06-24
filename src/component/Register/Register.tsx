@@ -72,17 +72,25 @@ const Register: React.FC = () => {
         <h1 className="title">Create Your Account</h1>
         <p className="description">Enter your details to get started</p>
 
-        <label className="label">Full Name</label>
-        <input className="input" type="text" name="fullName" />
+        <label htmlFor="fullName" className="label">
+          Full Name
+        </label>
+        <input id="fullName" className="input" type="text" name="fullName" />
 
-        <label className="label">Email Address</label>
-        <input className="input" type="email" name="email" />
+        <label htmlFor="email" className="label">
+          Email Address
+        </label>
+        <input id="email" className="input" type="email" name="email" />
 
-        <label className="label">Password</label>
-        <input className="input" type="password" name="password" />
+        <label htmlFor="password" className="label">
+          Password
+        </label>
+        <input id="password" className="input" type="password" name="password" />
 
-        <label className="label">Confirm Password</label>
-        <input className="input" type="password" name="password2" />
+        <label htmlFor="password2" className="label">
+          Confirm Password
+        </label>
+        <input id="password2" className="input" type="password" name="password2" />
 
         {errors.length > 0 && (
           <ul className="errorMessage">
@@ -104,7 +112,7 @@ const Register: React.FC = () => {
           >
             {isPending ? 'Saving user data...' : 'Sign Up'}
           </button>
-{/*           <button type="button">Sign Up With Google</button> */}
+          {/*           <button type="button">Sign Up With Google</button> */}
         </div>
       </form>
     </div>

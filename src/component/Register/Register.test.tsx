@@ -3,6 +3,15 @@ import { MemoryRouter } from 'react-router-dom';
 import Register from './Register';
 import { vi } from 'vitest';
 
+const mockNavigate = vi.fn();
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual<any>('react-router-dom');
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
+  };
+});
+
 vi.mock('@tanstack/react-query', async () => {
   const actual = await vi.importActual<any>('@tanstack/react-query');
   return {
@@ -32,7 +41,7 @@ describe('Register component', () => {
     expect(screen.getByRole('button', { name: /Sign Up/i })).toBeInTheDocument();
   });
 
-  test('shows errors if form is submitted empty', async () => {
+  test('shows errors if form is submitted empty', () => {
     render(
       <MemoryRouter>
         <Register />
@@ -46,22 +55,26 @@ describe('Register component', () => {
     expect(screen.getByText(/password must be at least 6 characters/i)).toBeInTheDocument();
   });
 
-  test('shows password mismatch error', async () => {
+  test('shows password mismatch error', () => {
     render(
       <MemoryRouter>
         <Register />
       </MemoryRouter>
     );
 
-    const fullNameInput = screen.getByLabelText(/Full Name/i);
-    const emailInput = screen.getByLabelText(/Email Address/i);
-    const passwordInput = screen.getByLabelText(/^Password$/i);
-    const confirmPasswordInput = screen.getByLabelText(/Confirm Password/i);
+    fireEvent.change(screen.getByLabelText(/Full Name/i), {
+      target: { value: 'Test User' },
+    });
+    fireEvent.change(screen.getByLabelText(/Email Address/i), {
+      target: { value: 'test@example.com' },
+    });
+    fireEvent.change(screen.getByLabelText(/^Password$/i), {
+      target: { value: '123456' },
+    });
+    fireEvent.change(screen.getByLabelText(/Confirm Password/i), {
+      target: { value: '654321' },
+    });
 
-    fireEvent.change(fullNameInput, { target: { value: 'Test User' } });
-    fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
-    fireEvent.change(passwordInput, { target: { value: '123456' } });
-    fireEvent.change(confirmPasswordInput, { target: { value: '654321' } });
     fireEvent.click(screen.getByRole('button', { name: /Sign Up/i }));
 
     expect(screen.getByText(/passwords do not match/i)).toBeInTheDocument();
