@@ -37,8 +37,11 @@ export default function Login() {
         <h1 className="title">Sign In To Your Account.</h1>
         <p className="description">Enter your details to continue</p>
 
-        <label className="label">Email Address</label>
+        <label className="label" htmlFor="email">
+          Email Address
+        </label>
         <input
+          id="email"
           className="input email"
           placeholder="email@gmail.com"
           type="email"
@@ -46,20 +49,25 @@ export default function Login() {
           onChange={e => setEmail(e.target.value)}
         />
 
-        <label className="label">Password</label>
+        <label className="label" htmlFor="password">
+          Password
+        </label>
         <div className="input-wrapper">
           <input
+            id="password"
             type={showPassword ? 'text' : 'password'}
             className="input password"
             placeholder="password"
             value={password}
             onChange={e => setPassword(e.target.value)}
+            data-testid="password-input"
           />
           <button
             type="button"
             className="toggle-password"
             onClick={() => setShowPassword(prev => !prev)}
             aria-label="Toggle password visibility"
+            data-testid="submit-input"
           >
             <img src={showPassword ? eyeHide : eyeShow} alt="Toggle password" />
           </button>
@@ -68,7 +76,7 @@ export default function Login() {
         {error && <p className="errorMessage">{error}</p>}
 
         <div className="buttons">
-          <button className="sign" onClick={handleSubmit}>
+          <button data-testid="submit-button" className="sign" onClick={handleSubmit}>
             Sign In
             <img src={buttonImg} alt="icon" />
           </button>

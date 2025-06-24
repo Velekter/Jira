@@ -1,10 +1,11 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { vi, describe, test, expect, beforeEach } from 'vitest';
+import Register from './Register';
 
 const mockNavigate = vi.fn();
 
-// Мокаємо useNavigate з react-router-dom
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual<any>('react-router-dom');
   return {
@@ -13,19 +14,20 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
+const renderRegister = () =>
+  render(
+    <MemoryRouter>
+      <Register />
+    </MemoryRouter>
+  );
+
 describe('Register component', () => {
   beforeEach(() => {
     mockNavigate.mockClear();
   });
 
-  test('renders all input fields and buttons', async () => {
-    const { default: Register } = await import('./Register');
-
-    render(
-      <MemoryRouter>
-        <Register />
-      </MemoryRouter>
-    );
+  test('renders all input fields and buttons', () => {
+    renderRegister();
 
     expect(screen.getByLabelText(/Full Name/i)).toBeInTheDocument();
     expect(screen.getByLabelText(/Email Address/i)).toBeInTheDocument();
@@ -35,46 +37,27 @@ describe('Register component', () => {
   });
 
   test('shows errors if form is submitted empty', async () => {
-    const { default: Register } = await import('./Register');
+    renderRegister();
+    const user = userEvent.setup();
 
-    render(
-      <MemoryRouter>
-        <Register />
-      </MemoryRouter>
-    );
+    await user.click(screen.getByRole('button', { name: /Sign Up/i }));
 
-    fireEvent.click(screen.getByRole('button', { name: /Sign Up/i }));
-
-    expect(screen.getByText(/full name must be at least 3 characters/i)).toBeInTheDocument();
+    expect(await screen.findByText(/full name must be at least 3 characters/i)).toBeInTheDocument();
     expect(screen.getByText(/invalid email address/i)).toBeInTheDocument();
     expect(screen.getByText(/password must be at least 6 characters/i)).toBeInTheDocument();
   });
 
   test('shows password mismatch error', async () => {
-    const { default: Register } = await import('./Register');
+    renderRegister();
+    const user = userEvent.setup();
 
-    render(
-      <MemoryRouter>
-        <Register />
-      </MemoryRouter>
-    );
+    await user.type(screen.getByLabelText(/Full Name/i), 'Test User');
+    await user.type(screen.getByLabelText(/Email Address/i), 'test@example.com');
+    await user.type(screen.getByLabelText(/^Password$/i), '123456');
+    await user.type(screen.getByLabelText(/Confirm Password/i), '654321');
+    await user.click(screen.getByRole('button', { name: /Sign Up/i }));
 
-    fireEvent.change(screen.getByLabelText(/Full Name/i), {
-      target: { value: 'Test User' },
-    });
-    fireEvent.change(screen.getByLabelText(/Email Address/i), {
-      target: { value: 'test@example.com' },
-    });
-    fireEvent.change(screen.getByLabelText(/^Password$/i), {
-      target: { value: '123456' },
-    });
-    fireEvent.change(screen.getByLabelText(/Confirm Password/i), {
-      target: { value: '654321' },
-    });
-
-    fireEvent.click(screen.getByRole('button', { name: /Sign Up/i }));
-
-    expect(screen.getByText(/passwords do not match/i)).toBeInTheDocument();
+    expect(await screen.findByText(/passwords do not match/i)).toBeInTheDocument();
   });
 
   test('navigates to /account after successful registration', async () => {
@@ -84,7 +67,7 @@ describe('Register component', () => {
         ...actual,
         useMutation: (options: any) => ({
           mutate: () => {
-            if (options && typeof options.onSuccess === 'function') {
+            if (typeof options?.onSuccess === 'function') {
               options.onSuccess();
             }
           },
@@ -96,28 +79,14 @@ describe('Register component', () => {
       };
     });
 
-    const { default: Register } = await import('./Register');
+    renderRegister();
+    const user = userEvent.setup();
 
-    render(
-      <MemoryRouter>
-        <Register />
-      </MemoryRouter>
-    );
-
-    fireEvent.change(screen.getByLabelText(/Full Name/i), {
-      target: { value: 'Test User' },
-    });
-    fireEvent.change(screen.getByLabelText(/Email Address/i), {
-      target: { value: 'test@example.com' },
-    });
-    fireEvent.change(screen.getByLabelText(/^Password$/i), {
-      target: { value: '123456' },
-    });
-    fireEvent.change(screen.getByLabelText(/Confirm Password/i), {
-      target: { value: '123456' },
-    });
-
-    fireEvent.click(screen.getByRole('button', { name: /Sign Up/i }));
+    await user.type(screen.getByLabelText(/Full Name/i), 'Test User');
+    await user.type(screen.getByLabelText(/Email Address/i), 'test@example.com');
+    await user.type(screen.getByLabelText(/^Password$/i), '123456');
+    await user.type(screen.getByLabelText(/Confirm Password/i), '123456');
+    await user.click(screen.getByRole('button', { name: /Sign Up/i }));
 
     expect(mockNavigate).toHaveBeenCalledWith('/account');
   });
