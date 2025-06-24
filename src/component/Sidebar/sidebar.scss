@@ -9,10 +9,22 @@
     border: none;
     cursor: pointer;
     z-index: 1001;
+    transition: all 0.3s ease;
 
     img {
       width: 24px;
       height: 24px;
+      transition: transform 0.3s ease;
+    }
+  }
+
+  &.open .toggle-button {
+    top: 20px;
+    left: 162px;
+    transform: translateX(100%);
+    
+    img {
+      transform: rotate(180deg);
     }
   }
 

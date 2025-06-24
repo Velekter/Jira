@@ -1,14 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import './sidebar.scss';
-import menuIcon from './img/menu.png'; 
+import menuIcon from './img/menu.png';
 
-const Sidebar: React.FC = () => {
-  const [isOpen, setIsOpen] = useState(false);
+interface SidebarProps {
+  isOpen: boolean;
+  toggleSidebar: () => void;
+}
 
-  const toggleSidebar = () => {
-    setIsOpen(prev => !prev);
-  };
-
+const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
   return (
     <div className={`sidebar-container ${isOpen ? 'open' : ''}`}>
       <button className="toggle-button" onClick={toggleSidebar}>
