@@ -1,9 +1,10 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
-import Register from './Register';
-import { vi } from 'vitest';
+import { vi, describe, test, expect, beforeEach } from 'vitest';
 
 const mockNavigate = vi.fn();
+
+// Мокаємо useNavigate з react-router-dom
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual<any>('react-router-dom');
   return {
@@ -12,22 +13,14 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-vi.mock('@tanstack/react-query', async () => {
-  const actual = await vi.importActual<any>('@tanstack/react-query');
-  return {
-    ...actual,
-    useMutation: () => ({
-      mutate: vi.fn(),
-      isPending: false,
-      isError: false,
-      isSuccess: false,
-      error: null,
-    }),
-  };
-});
-
 describe('Register component', () => {
-  test('renders all input fields and buttons', () => {
+  beforeEach(() => {
+    mockNavigate.mockClear();
+  });
+
+  test('renders all input fields and buttons', async () => {
+    const { default: Register } = await import('./Register');
+
     render(
       <MemoryRouter>
         <Register />
@@ -41,7 +34,9 @@ describe('Register component', () => {
     expect(screen.getByRole('button', { name: /Sign Up/i })).toBeInTheDocument();
   });
 
-  test('shows errors if form is submitted empty', () => {
+  test('shows errors if form is submitted empty', async () => {
+    const { default: Register } = await import('./Register');
+
     render(
       <MemoryRouter>
         <Register />
@@ -55,7 +50,9 @@ describe('Register component', () => {
     expect(screen.getByText(/password must be at least 6 characters/i)).toBeInTheDocument();
   });
 
-  test('shows password mismatch error', () => {
+  test('shows password mismatch error', async () => {
+    const { default: Register } = await import('./Register');
+
     render(
       <MemoryRouter>
         <Register />
@@ -78,5 +75,50 @@ describe('Register component', () => {
     fireEvent.click(screen.getByRole('button', { name: /Sign Up/i }));
 
     expect(screen.getByText(/passwords do not match/i)).toBeInTheDocument();
+  });
+
+  test('navigates to /account after successful registration', async () => {
+    vi.mock('@tanstack/react-query', async () => {
+      const actual = await vi.importActual<any>('@tanstack/react-query');
+      return {
+        ...actual,
+        useMutation: (options: any) => ({
+          mutate: () => {
+            if (options && typeof options.onSuccess === 'function') {
+              options.onSuccess();
+            }
+          },
+          isPending: false,
+          isError: false,
+          isSuccess: false,
+          error: null,
+        }),
+      };
+    });
+
+    const { default: Register } = await import('./Register');
+
+    render(
+      <MemoryRouter>
+        <Register />
+      </MemoryRouter>
+    );
+
+    fireEvent.change(screen.getByLabelText(/Full Name/i), {
+      target: { value: 'Test User' },
+    });
+    fireEvent.change(screen.getByLabelText(/Email Address/i), {
+      target: { value: 'test@example.com' },
+    });
+    fireEvent.change(screen.getByLabelText(/^Password$/i), {
+      target: { value: '123456' },
+    });
+    fireEvent.change(screen.getByLabelText(/Confirm Password/i), {
+      target: { value: '123456' },
+    });
+
+    fireEvent.click(screen.getByRole('button', { name: /Sign Up/i }));
+
+    expect(mockNavigate).toHaveBeenCalledWith('/account');
   });
 });
