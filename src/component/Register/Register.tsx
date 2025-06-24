@@ -104,7 +104,7 @@ const Register: React.FC = () => {
           >
             {isPending ? 'Saving user data...' : 'Sign Up'}
           </button>
-          <button type="button">Sign Up With Google</button>
+{/*           <button type="button">Sign Up With Google</button> */}
         </div>
       </form>
     </div>

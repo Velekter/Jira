@@ -3,7 +3,7 @@ import React from 'react';
 import { useUserData } from '../../hooks/useUserData';
 import { logoutUser } from '../../lib/auth';
 import Sidebar from '../Sidebar/Sidebar';
-import './Account.scss'
+import './account.scss'
 
 const Account: React.FC = () => {
   const userId = localStorage.getItem('userId') ?? '';
