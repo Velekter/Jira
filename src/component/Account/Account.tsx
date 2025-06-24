@@ -13,7 +13,7 @@ const Account: React.FC = () => {
   if (isError) return <p>Error: {error?.message}</p>;
 
   return (
-    <div className='container'>
+    <div className='account-page'>
       <Sidebar />
       <h1>Welcome, {data?.fullName}</h1>
       <p>Email: {data?.email}</p>
