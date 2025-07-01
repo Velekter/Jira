@@ -3,6 +3,8 @@ import { useUserData } from '../../hooks/useUserData';
 import { logoutUser } from '../../lib/auth';
 import Sidebar from '../Sidebar/Sidebar';
 import './account.scss';
+import FriendSearch from '../Friends/FriendSearch/FriendSearch';
+import FriendRequests from '../Friends/FriendRequests/FriendRequests';
 
 const Account: React.FC = () => {
   const userId = localStorage.getItem('userId') ?? '';
@@ -21,7 +23,11 @@ const Account: React.FC = () => {
     <div className={`account-page ${isSidebarOpen ? 'sidebar-open' : ''}`}>
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
       <div className="container">
-        <h1>111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111</h1>
+        <FriendSearch />
+        <FriendRequests />
+        <h1>
+          111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
+        </h1>
         <h1>Welcome, {data?.fullName}</h1>
         <p>Email: {data?.email}</p>
         <button onClick={logoutUser} className="logout-button">

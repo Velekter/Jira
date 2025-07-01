@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore, doc, setDoc, getDoc } from 'firebase/firestore';
+import type { DocumentData } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -13,8 +14,8 @@ const firebaseConfig = {
 };
 
 const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+export const auth = getAuth(app);
+export const db = getFirestore(app);
 
 interface RegisterFormData {
   email: string;
@@ -62,11 +63,23 @@ export const loginUser = async (email: string, password: string) => {
   }
 };
 
+
 export const fetchUserData = async (uid: string) => {
+  if (!uid) throw new Error('UID is missing');
+
   const userDocRef = doc(db, 'users', uid);
   const docSnap = await getDoc(userDocRef);
+
   if (!docSnap.exists()) {
     throw new Error('User not found');
   }
+
   return docSnap.data();
+};
+
+
+export const fetchUserById = async (uid: string): Promise<DocumentData> => {
+  const userDoc = await getDoc(doc(db, 'users', uid));
+  if (!userDoc.exists()) throw new Error('User not found');
+  return userDoc.data();
 };
