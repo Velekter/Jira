@@ -44,49 +44,44 @@ export default function FriendRequests() {
   };
 
   const fetchRequests = async () => {
-    console.log('userId from localStorage:', localStorage.getItem('userId'));
-
     if (!currentUserId) return;
 
-    const q = query(collection(db, 'friendRequests'), where('status', '==', 'pending'));
-    const snapshot = await getDocs(q);
+    const incomingQuery = query(
+      collection(db, 'friendRequests'),
+      where('to', '==', currentUserId),
+      where('status', '==', 'pending')
+    );
+    const outgoingQuery = query(
+      collection(db, 'friendRequests'),
+      where('from', '==', currentUserId),
+      where('status', '==', 'pending')
+    );
+
+    const incomingSnapshot = await getDocs(incomingQuery);
+    const outgoingSnapshot = await getDocs(outgoingQuery);
 
     const incomingReqs: DetailedRequest[] = [];
     const outgoingReqs: DetailedRequest[] = [];
 
-    for (const docSnap of snapshot.docs) {
+    for (const docSnap of incomingSnapshot.docs) {
       const data = docSnap.data() as Omit<FriendRequest, 'id'>;
-      const request: DetailedRequest = {
-        ...data,
-        id: docSnap.id,
-      };
+      const request: DetailedRequest = { ...data, id: docSnap.id };
+      try {
+        request.fromUser = await fetchUserData(data.from);
+        incomingReqs.push(request);
+      } catch (err) {
+        console.warn('Error fetching user data:', err);
+      }
+    }
 
-      if (data.to === currentUserId) {
-        // Дозволено, currentUser — отримувач, бачить відправника
-        if (currentUserId !== data.to && currentUserId !== data.from) {
-          console.warn('Немає доступу до цього запиту');
-          continue;
-        }
-
-        try {
-          request.fromUser = await fetchUserData(data.from);
-          incomingReqs.push(request);
-        } catch (err) {
-          console.warn('Помилка при отриманні даних користувача:', err);
-        }
-      } else if (data.from === currentUserId) {
-        // Дозволено, currentUser — відправник, бачить отримувача
-        if (currentUserId !== data.from && currentUserId !== data.to) {
-          console.warn('Немає доступу до цього запиту');
-          continue;
-        }
-
-        try {
-          request.toUser = await fetchUserData(data.to);
-          outgoingReqs.push(request);
-        } catch (err) {
-          console.warn('Помилка при отриманні даних користувача:', err);
-        }
+    for (const docSnap of outgoingSnapshot.docs) {
+      const data = docSnap.data() as Omit<FriendRequest, 'id'>;
+      const request: DetailedRequest = { ...data, id: docSnap.id };
+      try {
+        request.toUser = await fetchUserData(data.to);
+        outgoingReqs.push(request);
+      } catch (err) {
+        console.warn('Error fetching user data:', err);
       }
     }
 
