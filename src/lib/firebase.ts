@@ -35,6 +35,7 @@ export const registerUser = async (data: RegisterFormData) => {
       fullName,
       email,
       createdAt: new Date(),
+      friends: {},
     });
 
     const token = await user.getIdToken();
@@ -63,7 +64,6 @@ export const loginUser = async (email: string, password: string) => {
   }
 };
 
-
 export const fetchUserData = async (uid: string) => {
   if (!uid) throw new Error('UID is missing');
 
@@ -76,7 +76,6 @@ export const fetchUserData = async (uid: string) => {
 
   return docSnap.data();
 };
-
 
 export const fetchUserById = async (uid: string): Promise<DocumentData> => {
   const userDoc = await getDoc(doc(db, 'users', uid));

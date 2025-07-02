@@ -5,6 +5,7 @@ import Sidebar from '../Sidebar/Sidebar';
 import './account.scss';
 import FriendSearch from '../Friends/FriendSearch/FriendSearch';
 import FriendRequests from '../Friends/FriendRequests/FriendRequests';
+import FriendsList from '../Friends/FriendsList/FriendsList';
 
 const Account: React.FC = () => {
   const userId = localStorage.getItem('userId') ?? '';
@@ -25,6 +26,7 @@ const Account: React.FC = () => {
       <div className="container">
         <FriendSearch />
         <FriendRequests />
+        <FriendsList />
         <h1>
           111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
         </h1>

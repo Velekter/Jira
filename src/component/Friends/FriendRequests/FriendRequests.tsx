@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import {
   collection,
   doc,
-  getDocs,
+  onSnapshot,
   updateDoc,
   deleteDoc,
   query,
@@ -43,7 +43,7 @@ export default function FriendRequests() {
     return userSnap.data() as UserData;
   };
 
-  const fetchRequests = async () => {
+  useEffect(() => {
     if (!currentUserId) return;
 
     const incomingQuery = query(
@@ -51,75 +51,104 @@ export default function FriendRequests() {
       where('to', '==', currentUserId),
       where('status', '==', 'pending')
     );
+
     const outgoingQuery = query(
       collection(db, 'friendRequests'),
       where('from', '==', currentUserId),
       where('status', '==', 'pending')
     );
 
-    const incomingSnapshot = await getDocs(incomingQuery);
-    const outgoingSnapshot = await getDocs(outgoingQuery);
-
-    const incomingReqs: DetailedRequest[] = [];
-    const outgoingReqs: DetailedRequest[] = [];
-
-    for (const docSnap of incomingSnapshot.docs) {
-      const data = docSnap.data() as Omit<FriendRequest, 'id'>;
-      const request: DetailedRequest = { ...data, id: docSnap.id };
-      try {
-        request.fromUser = await fetchUserData(data.from);
-        incomingReqs.push(request);
-      } catch (err) {
-        console.warn('Error fetching user data:', err);
+    const unsubIncoming = onSnapshot(incomingQuery, async snapshot => {
+      const incomingReqs: DetailedRequest[] = [];
+      for (const docSnap of snapshot.docs) {
+        const data = docSnap.data() as Omit<FriendRequest, 'id'>;
+        const request: DetailedRequest = { ...data, id: docSnap.id };
+        try {
+          request.fromUser = await fetchUserData(data.from);
+          incomingReqs.push(request);
+        } catch (err) {
+          console.warn('Error fetching user data:', err);
+        }
       }
-    }
+      setIncoming(incomingReqs);
+      setLoading(false);
+    });
 
-    for (const docSnap of outgoingSnapshot.docs) {
-      const data = docSnap.data() as Omit<FriendRequest, 'id'>;
-      const request: DetailedRequest = { ...data, id: docSnap.id };
-      try {
-        request.toUser = await fetchUserData(data.to);
-        outgoingReqs.push(request);
-      } catch (err) {
-        console.warn('Error fetching user data:', err);
+    const unsubOutgoing = onSnapshot(outgoingQuery, async snapshot => {
+      const outgoingReqs: DetailedRequest[] = [];
+      for (const docSnap of snapshot.docs) {
+        const data = docSnap.data() as Omit<FriendRequest, 'id'>;
+        const request: DetailedRequest = { ...data, id: docSnap.id };
+        try {
+          request.toUser = await fetchUserData(data.to);
+          outgoingReqs.push(request);
+        } catch (err) {
+          console.warn('Error fetching user data:', err);
+        }
       }
-    }
+      setOutgoing(outgoingReqs);
+      setLoading(false);
+    });
 
-    setIncoming(incomingReqs);
-    setOutgoing(outgoingReqs);
-    setLoading(false);
-  };
+    return () => {
+      unsubIncoming();
+      unsubOutgoing();
+    };
+  }, [currentUserId]);
 
   const acceptRequest = async (request: FriendRequest) => {
+  try {
     const { from, to, id } = request;
+
+    const fromRef = doc(db, 'users', from);
+    const toRef = doc(db, 'users', to);
+
+    const [fromSnap, toSnap] = await Promise.all([getDoc(fromRef), getDoc(toRef)]);
+
+    if (!fromSnap.exists() || !toSnap.exists()) {
+      console.error('One or both users not found');
+      return;
+    }
+
+    const fromData = fromSnap.data();
+    const toData = toSnap.data();
+
+    console.log('Before update fromData.friends:', fromData.friends);
+    console.log('Before update toData.friends:', toData.friends);
 
     await updateDoc(doc(db, 'friendRequests', id), { status: 'accepted' });
 
     await Promise.all([
-      updateDoc(doc(db, 'users', to), {
-        [`friends.${from}`]: true,
+      updateDoc(fromRef, {
+        friends: {
+          ...(fromData.friends || {}),
+          [to]: true,
+        },
       }),
-      updateDoc(doc(db, 'users', from), {
-        [`friends.${to}`]: true,
+      updateDoc(toRef, {
+        friends: {
+          ...(toData.friends || {}),
+          [from]: true,
+        },
       }),
     ]);
 
-    fetchRequests();
-  };
+    const fromSnapAfter = await getDoc(fromRef);
+    console.log('After update fromData.friends:', fromSnapAfter.data()?.friends);
+
+  } catch (error) {
+    console.error('Error in acceptRequest:', error);
+  }
+};
+
 
   const rejectRequest = async (id: string) => {
     await deleteDoc(doc(db, 'friendRequests', id));
-    fetchRequests();
   };
 
   const cancelRequest = async (id: string) => {
     await deleteDoc(doc(db, 'friendRequests', id));
-    fetchRequests();
   };
-
-  useEffect(() => {
-    fetchRequests();
-  }, []);
 
   if (loading) return <p>Loading requests...</p>;
 
