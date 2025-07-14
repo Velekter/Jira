@@ -35,11 +35,11 @@
     position: fixed;
     top: 0;
     left: -150px;
-    width: 186px;
-    height: 93vh;
+    width: 216px;
+    height: 100vh;
     background-color: #1e293b;
     color: #fff;
-    padding: 40px 20px;
+    padding: 55px 20px 40px 20px;
     transition: left 0.3s ease;
     z-index: 1000;
 
@@ -61,5 +61,11 @@
 
   &.open .sidebar {
     left: 0;
+  }
+
+  &.collapsed-sid {
+    width: 66px;
+    padding: 55px 0 40px 0;
+    align-items: center; 
   }
 }
