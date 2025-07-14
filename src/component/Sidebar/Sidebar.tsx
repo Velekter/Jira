@@ -1,6 +1,9 @@
 import React from 'react';
 import './sidebar.scss';
+
 import menuIcon from './img/menu.png';
+import UserProfile from '../UserProfile/UserProfile';
+import { logoutUser } from '../../lib/auth';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -19,8 +22,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
           <li>Dashboard</li>
           <li>Tasks</li>
           <li>Settings</li>
-          <li>Logout</li>
+          <li>
+            <button onClick={logoutUser}>Logout</button>
+          </li>
         </ul>
+
+        <UserProfile />
       </div>
     </div>
   );

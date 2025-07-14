@@ -22,18 +22,21 @@
     top: 20px;
     left: 162px;
     transform: translateX(100%);
-    
+
     img {
       transform: rotate(180deg);
     }
   }
 
   .sidebar {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
     position: fixed;
     top: 0;
     left: -150px;
     width: 186px;
-    height: 100vh;
+    height: 93vh;
     background-color: #1e293b;
     color: #fff;
     padding: 40px 20px;
