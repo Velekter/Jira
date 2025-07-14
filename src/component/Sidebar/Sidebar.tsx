@@ -2,8 +2,8 @@ import React from 'react';
 import './sidebar.scss';
 
 import menuIcon from './img/menu.png';
-import UserProfile from '../UserProfile/UserProfile';
 import { logoutUser } from '../../lib/auth';
+import UserAvatar from '../UserAvatar/UserAvatar';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -27,7 +27,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar }) => {
           </li>
         </ul>
 
-        <UserProfile />
+        <UserAvatar />
       </div>
     </div>
   );
