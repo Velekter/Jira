@@ -3,6 +3,7 @@ import './sidebar.scss';
 
 import menuIcon from './img/menu.png';
 import UserAvatar from '../UserAvatar/UserAvatar';
+import { Link } from 'react-router-dom';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -24,6 +25,9 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, logoutUser }) 
           <li>Settings</li>
           <li>
             <button onClick={logoutUser}>Logout</button>
+          </li>
+          <li>
+            <Link to='/account/friend' >Friend</Link>
           </li>
         </ul>
 

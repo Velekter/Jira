@@ -3,9 +3,6 @@ import { useUserData } from '../../hooks/useUserData';
 import { logoutUser } from '../../lib/auth';
 import Sidebar from '../Sidebar/Sidebar';
 import './account.scss';
-import FriendSearch from '../Friends/FriendSearch/FriendSearch';
-import FriendRequests from '../Friends/FriendRequests/FriendRequests';
-import FriendsList from '../Friends/FriendsList/FriendsList';
 
 const Account: React.FC = () => {
   const userId = localStorage.getItem('userId') ?? '';
@@ -22,11 +19,8 @@ const Account: React.FC = () => {
 
   return (
     <div className={`account-page ${isSidebarOpen ? 'sidebar-open' : ''}`}>
-      <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+      <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} logoutUser={logoutUser} />
       <div className="container">
-        <FriendSearch />
-        <FriendRequests />
-        <FriendsList />
         <h1>
           111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111
         </h1>

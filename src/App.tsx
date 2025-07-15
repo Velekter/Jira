@@ -7,6 +7,7 @@ import ErrorPage from './pages/Error/ErrorPage.tsx';
 import AccountPage from './pages/AccountPage.tsx';
 import { checkAuthLoader } from './lib/auth.ts';
 import UserProfilePage from './pages/UserProfilePage.tsx';
+import FriendPage from './pages/FriendPage.tsx';
 
 export const router = createBrowserRouter([
   {
@@ -29,6 +30,12 @@ export const router = createBrowserRouter([
   {
     path: '/account/profile',
     element: <UserProfilePage />,
+    loader: checkAuthLoader,
+  },
+  {
+    path: '/account/friend',
+    element: <FriendPage />,
+    loader: checkAuthLoader,
   },
   {
     path: '*',

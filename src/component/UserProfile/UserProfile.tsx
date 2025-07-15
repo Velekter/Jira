@@ -1,16 +1,22 @@
 import { useEffect, useState } from 'react';
 import { useUserData } from '../../hooks/useUserData';
-import { useNavigate } from 'react-router-dom';
-import { updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
+import {
+  updateProfile,
+  updatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider,
+} from 'firebase/auth';
 import { doc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { auth, db, storage } from '../../lib/firebase';
-import './UserProfile.scss';
+import './userProfile.scss';
+import Back from '../Back/Back';
+
+const avatar = '/avatar.jpg';
 
 export default function UserProfile() {
   const userId = localStorage.getItem('userId') ?? '';
   const { data, isLoading, isError } = useUserData(userId);
-  const navigate = useNavigate();
 
   const [fullName, setFullName] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
@@ -23,10 +29,6 @@ export default function UserProfile() {
       setFullName(data.fullName || '');
     }
   }, [data]);
-
-  const handleBack = () => {
-    navigate('/account');
-  };
 
   const handleSave = async () => {
     if (!auth.currentUser || !userId) return;
@@ -70,41 +72,52 @@ export default function UserProfile() {
 
   if (isLoading) return <div className="edit-profile-page">Loading...</div>;
   if (isError || !data) return <div className="edit-profile-page">Error loading user</div>;
-
-  const avatarPreview = avatarFile
-    ? URL.createObjectURL(avatarFile)
-    : data.avatarUrl || '/default-avatar.png';
-
+  
   return (
     <div className="edit-profile-page">
-      <button className="back-button" onClick={handleBack}>← Back</button>
-
+      <Back />
       <div className="profile-section">
         <div className="avatar-wrapper">
-          <div
-            className="avatar-preview"
-            style={{ backgroundImage: `url(${avatarPreview})` }}
-          />
+          <div className="avatar-preview">
+            {avatar ? (
+              <img src={avatar} alt="Avatar" />
+            ) : (
+              <div className="placeholder">{data.fullName?.charAt(0).toUpperCase()}</div>
+            )}
+          </div>
           <label className="upload-photo">
             Change Photo
-            <input type="file" accept="image/*" onChange={(e) => setAvatarFile(e.target.files?.[0] || null)} />
+            <input
+              type="file"
+              accept="image/*"
+              onChange={e => setAvatarFile(e.target.files?.[0] || null)}
+            />
           </label>
         </div>
 
         <div className="form-fields">
+          <h2>Email: {data.email}</h2>
           <label>
             Full Name
-            <input type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} />
+            <input type="text" value={fullName} onChange={e => setFullName(e.target.value)} />
           </label>
 
           <label>
             Current Password
-            <input type="password" value={currentPassword} onChange={(e) => setCurrentPassword(e.target.value)} />
+            <input
+              type="password"
+              value={currentPassword}
+              onChange={e => setCurrentPassword(e.target.value)}
+            />
           </label>
 
           <label>
             New Password
-            <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} />
+            <input
+              type="password"
+              value={newPassword}
+              onChange={e => setNewPassword(e.target.value)}
+            />
           </label>
 
           <button className="save-button" onClick={handleSave} disabled={saving}>

@@ -1,0 +1,13 @@
+.back-button {
+    background: none;
+    border: none;
+    color: #60a5fa;
+    font-size: 18px;
+    margin-bottom: 30px;
+    cursor: pointer;
+    transition: color 0.3s;
+
+    &:hover {
+      color: #93c5fd;
+    }
+  }

@@ -3,6 +3,8 @@ import { Link } from 'react-router-dom';
 import { useUserData } from '../../hooks/useUserData';
 import './UserAvatar.scss';
 
+const avatar = '/avatar.jpg';
+
 interface UserAvatarProps {
   collapsed?: boolean;
 }
@@ -20,8 +22,8 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ collapsed = false }) => {
       className={`user-avatar${collapsed ? ' collapsed' : ''}`}
     >
       <div className="avatar">
-        {data.avatarUrl ? (
-          <img src={data.avatarUrl} alt="Avatar" />
+        {avatar ? (
+          <img src={avatar} alt="Avatar" />
         ) : (
           <div className="placeholder">{data.fullName?.charAt(0).toUpperCase()}</div>
         )}
