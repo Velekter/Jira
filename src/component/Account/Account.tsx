@@ -1,15 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useUserData } from '../../hooks/useUserData';
 import { logoutUser } from '../../lib/auth';
 import Sidebar from '../Sidebar/Sidebar';
-import './account.scss';
-import {
-  getTasksByUser,
-  createTask,
-  updateTask,
-} from '../../lib/tasks';
 import type { Task } from '../../lib/tasks';
- 
+import { getTasksByUser, createTask, updateTask, deleteTask } from '../../lib/tasks';
+
+import './account.scss';
+import TaskModal from '../TaskModal/TaskModal';
+import type { TaskModalRef } from '../TaskModal/TaskModal';
+
 const statuses: Task['status'][] = ['todo', 'inProgress', 'done'];
 
 const statusLabels: Record<Task['status'], string> = {
@@ -18,15 +17,21 @@ const statusLabels: Record<Task['status'], string> = {
   done: 'DONE',
 };
 
-
 const Account: React.FC = () => {
   const userId = localStorage.getItem('userId') ?? '';
   const { data, isLoading, isError, error } = useUserData(userId);
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [newTitle, setNewTitle] = useState('');
 
   const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
+
+  const modalTaskRef = useRef<TaskModalRef>(null);
+
+  const openEditModal = (task: Task) => {
+    modalTaskRef.current?.open(task);
+  };
 
   useEffect(() => {
     if (userId) {
@@ -56,6 +61,11 @@ const Account: React.FC = () => {
     await updateTask(taskId, { status: newStatus });
   };
 
+  const handleDeleteTask = async (taskId: string) => {
+    await deleteTask(taskId);
+    setTasks(prev => prev.filter(t => t.id !== taskId));
+  };
+
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Error: {error?.message}</p>;
 
@@ -64,20 +74,28 @@ const Account: React.FC = () => {
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} logoutUser={logoutUser} />
 
       <div className="container">
-        <div className="add-task">
+        <form
+          onSubmit={e => {
+            e.preventDefault();
+            handleAddTask();
+          }}
+          className="add-task"
+        >
           <input
             placeholder="New task title"
             value={newTitle}
             onChange={e => setNewTitle(e.target.value)}
           />
-          <button onClick={handleAddTask}>Add</button>
-        </div>
+          <button type="submit" disabled={!newTitle.trim()}>
+            Add
+          </button>
+        </form>
 
         <div className="kanban">
           {statuses.map(status => (
             <div
               key={status}
-              className="kanban-column"
+              className={`kanban-column ${status}`}
               onDragOver={e => e.preventDefault()}
               onDrop={e => {
                 const taskId = e.dataTransfer.getData('task-id');
@@ -94,13 +112,25 @@ const Account: React.FC = () => {
                     draggable
                     onDragStart={e => e.dataTransfer.setData('task-id', task.id!)}
                   >
-                    {task.title}
+                    <span onClick={() => openEditModal(task)}>
+                      {task.title}
+                      {task.deadline && (
+                        <div className="deadline">
+                          {new Date(task.deadline).toLocaleDateString()}
+                        </div>
+                      )}
+                    </span>
+                    <button className="delete-button" onClick={() => handleDeleteTask(task.id!)}>
+                      ✕
+                    </button>
                   </div>
                 ))}
             </div>
           ))}
         </div>
       </div>
+
+      <TaskModal ref={modalTaskRef} />
     </div>
   );
 };

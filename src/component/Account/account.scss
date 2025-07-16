@@ -85,24 +85,39 @@
 
   .kanban-task {
     background-color: #334155;
-    padding: 10px;
-    border-radius: 6px;
+    padding: 0.75rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
     cursor: grab;
-    color: #e2e8f0;
-    transition: transform 0.1s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 
-    &:active {
-      opacity: 0.7;
-      transform: scale(1.02);
+    span {
+      flex: 1;
+      word-break: break-word;
+      cursor: pointer;
     }
 
-    &:hover {
-      background-color: #475569;
+    .edit-input {
+      flex: 1;
+      font-size: 16px;
+      padding: 4px 8px;
+      border: 1px solid #aaa;
+      border-radius: 6px;
     }
-  }
 
-  .logout-button {
-    font-size: 20px;
-    color: red;
+    .delete-button {
+      background: transparent;
+      border: none;
+      font-size: 18px;
+      color: red;
+      margin-left: 0.5rem;
+      cursor: pointer;
+
+      &:hover {
+        color: darkred;
+      }
+    }
   }
 }

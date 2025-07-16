@@ -16,6 +16,8 @@ export interface Task {
   status: 'todo' | 'inProgress' | 'done';
   createdAt: number;
   userId: string;
+  description?: string;
+  deadline?: number;
 }
 
 const tasksRef = collection(db, 'tasks');
