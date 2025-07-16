@@ -6,6 +6,7 @@ import './login.scss';
 import buttonImg from './img/button.png';
 import eyeShow from './img/show.svg';
 import eyeHide from './img/hide.svg';
+import Back from '../Back/Back';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -34,6 +35,7 @@ export default function Login() {
   return (
     <div className="login-page" data-testid="login-page">
       <div className="container">
+      <Back page={'/'}/>
         <h1 className="title">Sign In To Your Account.</h1>
         <p className="description">Enter your details to continue</p>
 

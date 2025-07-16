@@ -1,9 +1,9 @@
 import { Link } from 'react-router-dom';
 import './back.scss'
 
-function Back() {
+function Back({page}: {page: string}) {
   return (
-    <Link to="/account" className="back-button">
+    <Link to={page} className="back-button">
       ← Back
     </Link>
   );

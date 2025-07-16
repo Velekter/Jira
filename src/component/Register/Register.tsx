@@ -3,6 +3,9 @@ import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { registerUser } from '../../lib/auth';
 import './register.scss';
+import Back from '../Back/Back';
+import eyeShow from '../Login/img/show.svg';
+import eyeHide from '../Login/img/hide.svg';
 
 interface RegisterFormData {
   fullName: string;
@@ -12,6 +15,8 @@ interface RegisterFormData {
 
 const Register: React.FC = () => {
   const [errors, setErrors] = useState<string[]>([]);
+  const [showPasswordFirst, setShowPasswordFirst] = useState<boolean>(false);
+  const [showPasswordSecond, setShowPasswordSecond] = useState<boolean>(false);
   const navigate = useNavigate();
 
   const { mutate, isPending, isError, error, isSuccess } = useMutation<
@@ -69,6 +74,7 @@ const Register: React.FC = () => {
   return (
     <div className="register-page" data-testid="signup-page">
       <form onSubmit={handleSubmit} className="container" noValidate>
+        <Back page={'/'} />
         <h1 className="title">Create Your Account</h1>
         <p className="description">Enter your details to get started</p>
 
@@ -85,12 +91,43 @@ const Register: React.FC = () => {
         <label htmlFor="password" className="label">
           Password
         </label>
-        <input id="password" className="input" type="password" name="password" />
-
+        <div className="input-wrapper">
+          <input
+            id="password"
+            className="input password"
+            type={showPasswordFirst ? 'text' : 'password'}
+            name="password"
+          />
+          <button
+            type="button"
+            className="toggle-password"
+            onClick={() => setShowPasswordFirst(prev => !prev)}
+            aria-label="Toggle password visibility"
+            data-testid="submit-input"
+          >
+            <img src={showPasswordFirst ? eyeHide : eyeShow} alt="Toggle password" />
+          </button>
+        </div >
         <label htmlFor="password2" className="label">
           Confirm Password
         </label>
-        <input id="password2" className="input" type="password" name="password2" />
+        <div className="input-wrapper">
+          <input
+            id="password2"
+            className="input password"
+            type={showPasswordSecond ? 'text' : 'password'}
+            name="password2"
+          />
+          <button
+            type="button"
+            className="toggle-password"
+            onClick={() => setShowPasswordSecond(prev => !prev)}
+            aria-label="Toggle password visibility"
+            data-testid="submit-input"
+          >
+            <img src={showPasswordSecond ? eyeHide : eyeShow} alt="Toggle password" />
+          </button>
+        </div>
 
         {errors.length > 0 && (
           <ul className="errorMessage">

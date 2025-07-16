@@ -5,7 +5,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  font-family: "Plus Jakarta Sans";
+  font-family: 'Plus Jakarta Sans';
 
   .container {
     display: flex;
@@ -49,6 +49,30 @@
       border: 1px solid #cbd5e1;
       margin-bottom: 15px;
     }
+    .input-wrapper {
+      position: relative;
+
+      .input.password {
+        width: 100%;
+        padding-right: 44px;
+      }
+
+      .toggle-password {
+        position: absolute;
+        top: 50%;
+        right: 12px;
+        transform: translateY(-70%);
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+
+        img {
+          width: 20px;
+          height: 20px;
+        }
+      }
+    }
 
     .buttons {
       display: flex;
@@ -64,9 +88,11 @@
         border-radius: 20px;
         transition: all 0.3s ease;
         text-decoration: none;
-        background-color: #4F46E5;
+        background-color: #4f46e5;
         color: #fff;
-        transition: background-color 0.3s ease, transform 0.3s ease;
+        transition:
+          background-color 0.3s ease,
+          transform 0.3s ease;
 
         &:hover {
           background-color: #003f99;

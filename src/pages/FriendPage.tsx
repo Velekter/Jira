@@ -6,7 +6,7 @@ import Back from '../component/Back/Back';
 function FriendPage() {
   return (
     <>
-      <Back />
+      <Back page={'/account'}/>
       <FriendSearch />
       <FriendRequests />
       <FriendsList />

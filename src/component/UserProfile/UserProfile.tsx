@@ -75,7 +75,7 @@ export default function UserProfile() {
   
   return (
     <div className="edit-profile-page">
-      <Back />
+      <Back page={'/account'}/>
       <div className="profile-section">
         <div className="avatar-wrapper">
           <div className="avatar-preview">
