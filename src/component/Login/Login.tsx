@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { loginUser } from '../../lib/firebase';
+import { loginUser } from '../../lib/auth';
 
 import './login.scss';
 import buttonImg from './img/button.png';

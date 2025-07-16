@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
-import { registerUser } from '../../lib/firebase';
+import { registerUser } from '../../lib/auth';
 import './register.scss';
 
 interface RegisterFormData {

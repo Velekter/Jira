@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { fetchUserData } from '../lib/firebase';
+import { fetchUserData } from '../lib/users';
 
 export const useUserData = (uid: string) => {
   return useQuery({
