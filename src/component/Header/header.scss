@@ -14,12 +14,13 @@
     color: #f1f5f9;
     font-size: 28px;
     font-weight: 600;
-    margin-bottom: 16px;
+    margin-bottom: 6px;
   }
 
   .kanban-header__buttons {
     display: flex;
     gap: 12px;
+    padding: 10px 10px 10px 0;
 
     button {
       color: #f1f5f9;
@@ -38,6 +39,16 @@
       &.active {
         background-color: #6366f1;
         color: white;
+      }
+    }
+
+    .add-board-btn {
+      margin-left: auto;          
+      background-color: #4f46e5; 
+      color: white;
+
+      &:hover {
+        background-color: #4338ca;
       }
     }
   }

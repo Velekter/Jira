@@ -38,17 +38,46 @@
     justify-content: space-between;
     align-items: center;
     color: #666;
+    position: relative;
 
-    button {
-      background: none;
-      border: none;
-      font-size: 1.5rem;
-      cursor: pointer;
-      color: #777;
-      transition: color 0.2s;
+    .kanban-column-buttons {
+      display: flex;
+      gap: 0.5rem;
 
-      &:hover {
+      button {
+        width: 30px;
+        height: 30px;
+        font-size: 20px;
+        font-weight: bold;
+        border: none;
+        cursor: pointer;
+        border-radius: 6px;
+        display: flex;
+        justify-content: center;
+        user-select: none;
+        position: relative;
+        top: 2px;
         color: #333;
+        background-color: transparent;
+        transition: background-color 0.2s ease;
+
+        &:hover {
+          color: #333;
+        }
+      }
+
+      .add-btn {
+        &:hover {
+          background-color: #34a853;
+        }
+      }
+
+      .delete-btn {
+        color: #333;
+
+        &:hover {
+          background-color: #ff4d4f;
+        }
       }
     }
   }

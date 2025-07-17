@@ -84,6 +84,16 @@ const Account: React.FC = () => {
     }
   };
 
+  const handleDeleteBoard = (status: Task['status']) => {
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete the board "${status}"? All tasks with this status will be lost.`
+    );
+    if (confirmDelete) {
+      setStatuses(prev => prev.filter(s => s !== status));
+      setTasks(prev => prev.filter(task => task.status !== status));
+    }
+  };
+
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Error: {error?.message}</p>;
 
@@ -107,7 +117,14 @@ const Account: React.FC = () => {
               >
                 <h3>
                   {statusLabels[status] || status}
-                  <button onClick={() => openEditModal()}>+</button>
+                  <span className="kanban-column-buttons">
+                    <button className="add-btn" onClick={() => openEditModal()}>
+                      🞧
+                    </button>
+                    <button className="delete-btn" onClick={() => handleDeleteBoard(status)}>
+                      🞨
+                    </button>
+                  </span>
                 </h3>
 
                 {tasks
