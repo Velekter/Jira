@@ -10,8 +10,6 @@ import TaskModal from '../TaskModal/TaskModal';
 import type { TaskModalRef } from '../TaskModal/TaskModal';
 import Header from '../Header/Header';
 
-const statuses: Task['status'][] = ['todo', 'inProgress', 'done'];
-
 const statusLabels: Record<Task['status'], string> = {
   todo: 'TO DO',
   inProgress: 'IN PROGRESS',
@@ -24,6 +22,7 @@ const Account: React.FC = () => {
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [statuses, setStatuses] = useState<Task['status'][]>(['todo', 'inProgress', 'done']);
 
   const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
 
@@ -77,12 +76,20 @@ const Account: React.FC = () => {
     };
   }, [setTasks]);
 
+  const addBoard = (boardName: string) => {
+    if (boardName && !statuses.includes(boardName as Task['status'])) {
+      setStatuses(prev => [...prev, boardName as Task['status']]);
+    } else {
+      alert('Invalid or existing board name');
+    }
+  };
+
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Error: {error?.message}</p>;
 
   return (
     <>
-      <Header isSidebarOpen={isSidebarOpen} />
+      <Header isSidebarOpen={isSidebarOpen} onCreateBoard={addBoard} />
       <div className={`account-page ${isSidebarOpen ? 'sidebar-open' : ''}`}>
         <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} logoutUser={logoutUser} />
 
@@ -99,9 +106,10 @@ const Account: React.FC = () => {
                 }}
               >
                 <h3>
-                  {statusLabels[status]}
+                  {statusLabels[status] || status}
                   <button onClick={() => openEditModal()}>+</button>
                 </h3>
+
                 {tasks
                   .filter(task => task.status === status)
                   .map(task => (
