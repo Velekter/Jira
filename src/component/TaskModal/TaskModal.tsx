@@ -2,10 +2,11 @@ import { useRef, useImperativeHandle, useState, forwardRef } from 'react';
 import Modal from '../Modal/Modal';
 import type { ModalRef } from '../Modal/Modal';
 import type { Task } from '../../lib/tasks';
+import { deleteTask } from '../../lib/tasks';
 import './taskModal.scss';
 
 export type TaskModalRef = {
-  open: (task: Task) => void;
+  open: (task?: Task) => void;
   close: () => void;
 };
 
@@ -17,14 +18,27 @@ const TaskModal = forwardRef<TaskModalRef>((_, ref) => {
   const [desc, setDesc] = useState('');
   const [status, setStatus] = useState<Task['status']>('todo');
   const [deadline, setDeadline] = useState('');
+  const [priority, setPriority] = useState<Task['priority']>('medium');
 
   useImperativeHandle(ref, () => ({
-    open: (task: Task) => {
-      setTask(task);
-      setTitle(task.title);
-      setDesc(task.description ?? '');
-      setStatus(task.status);
-      setDeadline(task.deadline ? new Date(task.deadline).toISOString().split('T')[0] : '');
+    open: (taskData?: Task) => {
+      if (taskData) {
+        setTask(taskData);
+        setTitle(taskData.title);
+        setDesc(taskData.description ?? '');
+        setStatus(taskData.status);
+        setDeadline(
+          taskData.deadline ? new Date(taskData.deadline).toISOString().split('T')[0] : ''
+        );
+        setPriority(taskData.priority ?? 'medium');
+      } else {
+        setTask(null);
+        setTitle('');
+        setDesc('');
+        setStatus('todo');
+        setDeadline('');
+        setPriority('medium');
+      }
       modalRef.current?.open();
     },
     close: () => {
@@ -34,39 +48,87 @@ const TaskModal = forwardRef<TaskModalRef>((_, ref) => {
   }));
 
   const handleSave = () => {
-    if (!task) return;
-    const updated = {
+    const baseTask = {
       title,
       description: desc,
       status,
       deadline: deadline ? new Date(deadline).getTime() : undefined,
+      priority,
     };
 
-    window.dispatchEvent(
-      new CustomEvent('task-save', {
-        detail: { id: task.id, updatedTask: updated },
-      })
-    );
+    if (task) {
+      window.dispatchEvent(
+        new CustomEvent('task-save', {
+          detail: { id: task.id, updatedTask: baseTask },
+        })
+      );
+    } else {
+      const newTask: Task = {
+        id: Date.now().toString(),
+        userId: localStorage.getItem('userId') ?? '',
+        ...baseTask,
+      };
+
+      window.dispatchEvent(
+        new CustomEvent('task-create', {
+          detail: { newTask },
+        })
+      );
+    }
+
     modalRef.current?.close();
     setTask(null);
   };
 
+  const handleDelete = async () => {
+    if (!task) return;
+
+    try {
+      await deleteTask(task.id!);
+      window.dispatchEvent(
+        new CustomEvent('task-delete', {
+          detail: { id: task.id },
+        })
+      );
+      modalRef.current?.close();
+      setTask(null);
+    } catch (error) {
+      console.error('Delete failed', error);
+    }
+  };
+
   return (
     <Modal ref={modalRef}>
-      <h2>Edit Task</h2>
+      <h2>{task ? 'Edit Task' : 'New Task'}</h2>
+
       <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Title" />
       <textarea value={desc} onChange={e => setDesc(e.target.value)} placeholder="Description" />
       <input type="date" value={deadline} onChange={e => setDeadline(e.target.value)} />
+
       <select value={status} onChange={e => setStatus(e.target.value as Task['status'])}>
         <option value="todo">To Do</option>
         <option value="inProgress">In Progress</option>
         <option value="done">Done</option>
       </select>
+
+      <select value={priority} onChange={e => setPriority(e.target.value as Task['priority'])}>
+        <option value="low">Low Priority</option>
+        <option value="medium">Medium Priority</option>
+        <option value="high">High Priority</option>
+      </select>
+
       <div className="buttons">
-        <button onClick={handleSave}>Save</button>
-        <button className="cancel" onClick={() => modalRef.current?.close()}>
-          Cancel
-        </button>
+        {task && (
+          <button className="delete" onClick={handleDelete}>
+            Delete
+          </button>
+        )}
+        <div className="right-buttons">
+          <button onClick={handleSave}>{task ? 'Save' : 'Create'}</button>
+          <button className="cancel" onClick={() => modalRef.current?.close()}>
+            Cancel
+          </button>
+        </div>
       </div>
     </Modal>
   );

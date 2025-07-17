@@ -1,84 +1,9 @@
 .modal-backdrop {
   position: fixed;
-  inset: 0; /* top:0; right:0; bottom:0; left:0; */
-  background: rgba(0, 0, 0, 0.5);
+  inset: 0;
+  background: rgba(0, 0, 0, 0.801);
+  z-index: 999;
   display: flex;
-  align-items: center;
   justify-content: center;
-  z-index: 1000;
-}
-
-.modal-content {
-  background: #1e293b; /* темний фон, якщо у тебе темна тема */
-  color: #f1f5f9;
-  padding: 2rem;
-  border-radius: 12px;
-  width: 90%;
-  max-width: 500px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-
-  h2 {
-    margin: 0;
-    font-size: 1.5rem;
-    text-align: center;
-  }
-
-  input,
-  textarea,
-  select {
-    width: 100%;
-    padding: 0.6rem 1rem;
-    border: 1px solid #334155;
-    border-radius: 6px;
-    background: #0f172a;
-    color: #f1f5f9;
-    font-size: 1rem;
-    transition: border-color 0.2s;
-
-    &:focus {
-      outline: none;
-      border-color: #6366f1;
-    }
-  }
-
-  textarea {
-    resize: vertical;
-    min-height: 80px;
-  }
-
-  .buttons {
-    display: flex;
-    justify-content: flex-end;
-    gap: 0.5rem;
-
-    button {
-      padding: 0.5rem 1rem;
-      font-size: 1rem;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-weight: 600;
-      transition: background 0.2s;
-
-      &:first-child {
-        background: #6366f1;
-        color: #fff;
-        &:hover {
-          background: #4f46e5;
-        }
-      }
-
-      &.cancel {
-        background: transparent;
-        color: #f1f5f9;
-        border: 1px solid #334155;
-        &:hover {
-          background: #334155;
-        }
-      }
-    }
-  }
+  align-items: center;
 }

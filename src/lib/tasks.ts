@@ -14,10 +14,11 @@ export interface Task {
   id?: string;
   title: string;
   status: 'todo' | 'inProgress' | 'done';
-  createdAt: number;
+  createdAt?: number;
   userId: string;
   description?: string;
   deadline?: number;
+  priority?: 'low' | 'medium' | 'high';
 }
 
 const tasksRef = collection(db, 'tasks');

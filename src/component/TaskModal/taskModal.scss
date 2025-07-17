@@ -1,14 +1,4 @@
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
-  z-index: 999;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.modal {
+.modal-content {
   background-color: #1e1e2f;
   border: none;
   border-radius: 12px;
@@ -58,34 +48,55 @@
 
   .buttons {
     display: flex;
-    justify-content: flex-end;
-    gap: 1rem;
+    justify-content: space-between; 
     margin-top: 1rem;
+    align-items: center;
 
-    button {
-      padding: 0.6rem 1.4rem;
-      font-size: 1rem;
+    .delete {
+      background-color: crimson;
+      color: white;
       border-radius: 8px;
       border: none;
       cursor: pointer;
       font-weight: 600;
-      transition: all 0.2s;
+      padding: 0.6rem 1.4rem;
+      font-size: 1rem;
+      transition: background-color 0.2s;
 
-      &:first-child {
-        background-color: #4f46e5;
-        color: white;
-
-        &:hover {
-          background-color: #4338ca;
-        }
+      &:hover {
+        background-color: darkred;
       }
+    }
 
-      &.cancel {
-        background-color: #3a3a3a;
-        color: white;
+    .right-buttons {
+      display: flex;
+      gap: 10px;
 
-        &:hover {
-          background-color: #555;
+      button {
+        padding: 0.6rem 1.4rem;
+        font-size: 1rem;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background-color 0.2s;
+
+        &:first-child {
+          background-color: #4f46e5;
+          color: white;
+
+          &:hover {
+            background-color: #4338ca;
+          }
+        }
+
+        &.cancel {
+          background-color: #3a3a3a;
+          color: white;
+
+          &:hover {
+            background-color: #555;
+          }
         }
       }
     }
