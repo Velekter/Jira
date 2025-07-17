@@ -1,0 +1,45 @@
+.dashboard-header {
+  align-self: flex-start;
+  margin-bottom: 24px;
+  background-color: #334155;
+  width: 100%;
+  padding-left: 90px;
+
+  transition: padding-left 0.3s ease;
+
+  &.sidebar-open {
+    padding-left: 226px;
+  }
+
+  h1 {
+    color: #f1f5f9;
+    font-size: 28px;
+    font-weight: 600;
+    margin-bottom: 16px;
+  }
+
+  .kanban-header__buttons {
+    display: flex;
+    gap: 12px;
+
+    button {
+      color: #f1f5f9;
+      border: none;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+
+      &:hover {
+        background-color: #334155;
+      }
+
+      &.active {
+        background-color: #6366f1;
+        color: white;
+      }
+    }
+  }
+}
