@@ -5,7 +5,7 @@ import AddBoardModal from '../AddBoaedModal/AddBoardModal';
 
 interface HeaderProps {
   isSidebarOpen: boolean;
-  onCreateBoard: (boardName: string) => void;
+  onCreateBoard: (boardName: string, color: string) => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ isSidebarOpen, onCreateBoard }) => {
@@ -21,7 +21,10 @@ const Header: React.FC<HeaderProps> = ({ isSidebarOpen, onCreateBoard }) => {
       <div className="kanban-header__buttons">
         <button>Upcoming Tasks</button>
         <button>Current Task</button>
-        <button className="add-board-btn" onClick={handleAddBoardClick}> + Add Board</button>
+        <button className="add-board-btn" onClick={handleAddBoardClick}>
+          {' '}
+          + Add Board
+        </button>
       </div>
 
       <AddBoardModal ref={modalRef} onCreateBoard={onCreateBoard} />

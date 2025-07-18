@@ -1,4 +1,4 @@
-import { db } from './firebase';
+import { db } from '../firebase';
 import {
   collection,
   addDoc,
@@ -13,7 +13,7 @@ import {
 export interface Task {
   id?: string;
   title: string;
-  status: 'todo' | 'inProgress' | 'done';
+  status: string;
   createdAt?: number;
   userId: string;
   description?: string;

@@ -4,11 +4,24 @@ import type { ModalRef } from '../Modal/Modal';
 import './addBoardModal.scss';
 
 interface AddBoardModalProps {
-  onCreateBoard: (boardName: string) => void;
+  onCreateBoard: (boardName: string, color: string) => void;
 }
+
+const COLORS = [
+  '#F87171', // red
+  '#FBBF24', // yellow
+  '#000000ff', // black
+  '#A78BFA', // purple
+  '#F472B6', // pink
+  '#38BDF8', // sky
+  '#FB923C', // orange
+  '#4ADE80', // lime
+  '#C084FC', // violet
+];
 
 const AddBoardModal = forwardRef<ModalRef, AddBoardModalProps>(({ onCreateBoard }, ref) => {
   const [boardName, setBoardName] = useState('');
+  const [selectedColor, setSelectedColor] = useState(COLORS[0]);
   const modalRef = React.useRef<ModalRef>(null);
 
   useImperativeHandle(ref, () => ({
@@ -21,8 +34,9 @@ const AddBoardModal = forwardRef<ModalRef, AddBoardModalProps>(({ onCreateBoard 
     const trimmed = boardName.trim();
     if (!trimmed) return;
 
-    onCreateBoard(trimmed);
+    onCreateBoard(trimmed, selectedColor);
     setBoardName('');
+    setSelectedColor(COLORS[0]);
     modalRef.current?.close();
   };
 
@@ -37,6 +51,20 @@ const AddBoardModal = forwardRef<ModalRef, AddBoardModalProps>(({ onCreateBoard 
           onChange={e => setBoardName(e.target.value)}
           required
         />
+
+        <div className="color-picker">
+          <label>Select color:</label>
+          <div className="color-options">
+            {COLORS.map(color => (
+              <div
+                key={color}
+                className={`color-swatch ${selectedColor === color ? 'selected' : ''}`}
+                style={{ backgroundColor: color }}
+                onClick={() => setSelectedColor(color)}
+              />
+            ))}
+          </div>
+        </div>
 
         <div className="buttons">
           <button type="submit">Create</button>

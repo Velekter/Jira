@@ -1,8 +1,8 @@
 import { useRef, useImperativeHandle, useState, forwardRef } from 'react';
 import Modal from '../Modal/Modal';
 import type { ModalRef } from '../Modal/Modal';
-import type { Task } from '../../lib/tasks';
-import { deleteTask } from '../../lib/tasks';
+import type { Task } from '../../lib/tasks/tasks';
+import { deleteTask } from '../../lib/tasks/tasks';
 import './taskModal.scss';
 
 export type TaskModalRef = {
@@ -10,7 +10,12 @@ export type TaskModalRef = {
   close: () => void;
 };
 
-const TaskModal = forwardRef<TaskModalRef>((_, ref) => {
+interface TaskModalProps {
+  statuses: string[];
+  statusLabels: Record<string, string>;
+}
+
+const TaskModal = forwardRef<TaskModalRef, TaskModalProps>(({ statuses, statusLabels }, ref) => {
   const modalRef = useRef<ModalRef>(null);
 
   const [task, setTask] = useState<Task | null>(null);
@@ -106,9 +111,11 @@ const TaskModal = forwardRef<TaskModalRef>((_, ref) => {
       <input type="date" value={deadline} onChange={e => setDeadline(e.target.value)} />
 
       <select value={status} onChange={e => setStatus(e.target.value as Task['status'])}>
-        <option value="todo">To Do</option>
-        <option value="inProgress">In Progress</option>
-        <option value="done">Done</option>
+        {statuses.map(s => (
+          <option key={s} value={s}>
+            {statusLabels[s] || s}
+          </option>
+        ))}
       </select>
 
       <select value={priority} onChange={e => setPriority(e.target.value as Task['priority'])}>
