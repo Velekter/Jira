@@ -1,4 +1,13 @@
-import { collection, addDoc, getDocs, query, orderBy, deleteDoc, doc } from 'firebase/firestore';
+import {
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  orderBy,
+  deleteDoc,
+  doc,
+  updateDoc,
+} from 'firebase/firestore';
 import { db } from './firebase';
 
 interface Board {
@@ -28,4 +37,9 @@ export async function getBoards(userId: string): Promise<Board[]> {
 export async function deleteBoard(userId: string, boardId: string) {
   const boardRef = doc(db, 'users', userId, 'boards', boardId);
   await deleteDoc(boardRef);
+}
+
+export async function updateBoard(userId: string, boardId: string, updates: Partial<Board>) {
+  const boardRef = doc(db, 'users', userId, 'boards', boardId);
+  await updateDoc(boardRef, updates);
 }

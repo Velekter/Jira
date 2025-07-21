@@ -1,0 +1,61 @@
+.kanban-column {
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  flex: 1;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  max-height: 100%;
+
+  h3 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #666;
+    position: relative;
+
+    .kanban-column-buttons {
+      display: flex;
+      gap: 0.5rem;
+
+      button {
+        width: 30px;
+        height: 30px;
+        font-size: 20px;
+        font-weight: bold;
+        border: none;
+        cursor: pointer;
+        border-radius: 6px;
+        display: flex;
+        justify-content: center;
+        user-select: none;
+        position: relative;
+        top: 2px;
+        color: #333;
+        background-color: transparent;
+        transition: background-color 0.2s ease;
+
+        &:hover {
+          color: #333;
+        }
+      }
+
+      .add-btn {
+        &:hover {
+          background-color: #34a853;
+        }
+      }
+
+      .delete-btn {
+        color: #333;
+
+        &:hover {
+          background-color: #ff4d4f;
+        }
+      }
+    }
+  }
+}

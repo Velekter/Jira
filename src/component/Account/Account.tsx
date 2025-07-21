@@ -10,7 +10,8 @@ import TaskModal from '../TaskModal/TaskModal';
 import type { TaskModalRef } from '../TaskModal/TaskModal';
 import Header from '../Header/Header';
 
-import { addBoard, getBoards, deleteBoard } from '../../lib/boards';
+import { addBoard, getBoards, deleteBoard, updateBoard } from '../../lib/boards';
+import BoardColumn from '../BoardColumn/BoardColumn'
 
 const statusLabels: Record<string, string> = {
   todo: 'TO DO',
@@ -18,7 +19,7 @@ const statusLabels: Record<string, string> = {
   done: 'DONE',
 };
 
-const DEFAULT_COLORS = ['#F87171', '#FBBF24', '#4ADE80']; // базові кольори для перших 3х
+const DEFAULT_COLORS = ['#f8d471ff', '#5224fbff', '#4ADE80'];
 
 const Account: React.FC = () => {
   const userId = localStorage.getItem('userId') ?? '';
@@ -37,33 +38,45 @@ const Account: React.FC = () => {
   };
 
   useEffect(() => {
-    if (!userId) return;
+  if (!userId) return;
 
-    async function initializeBoards() {
-      const boardsData = await getBoards(userId);
+  async function initializeBoards() {
+    const boardsData = await getBoards(userId);
 
-      if (boardsData.length === 0) {
-        const defaultBoards = ['todo', 'inProgress', 'done'];
-        const createdBoards = [];
+    if (boardsData.length === 0) {
+      const defaultBoards = ['todo', 'inProgress', 'done'];
+      const createdBoards = [];
 
-        for (let i = 0; i < defaultBoards.length; i++) {
-          const name = defaultBoards[i];
-          const color = DEFAULT_COLORS[i % DEFAULT_COLORS.length];
-          const id = await addBoard(userId, name, color);
-          createdBoards.push({ id, name, color });
-        }
-
-        setBoards(createdBoards);
-        setStatuses(createdBoards.map(b => b.name));
-      } else {
-        setBoards(boardsData);
-        setStatuses(boardsData.map(b => b.name));
+      for (let i = 0; i < defaultBoards.length; i++) {
+        const name = defaultBoards[i];
+        const color = DEFAULT_COLORS[i % DEFAULT_COLORS.length];
+        const id = await addBoard(userId, name, color);
+        createdBoards.push({ id, name, color });
       }
-    }
 
-    initializeBoards();
-    getTasksByUser(userId).then(setTasks);
-  }, [userId]);
+      setBoards(createdBoards);
+      setStatuses(createdBoards.map(b => b.name));
+    } else {
+      const updatedBoards = await Promise.all(
+        boardsData.map(async (board, i) => {
+          if (!board.color) {
+            const color = DEFAULT_COLORS[i % DEFAULT_COLORS.length];
+            await updateBoard(userId, board.id, { color });
+            return { ...board, color };
+          }
+          return board;
+        })
+      );
+
+      setBoards(updatedBoards);
+      setStatuses(updatedBoards.map(b => b.name));
+    }
+  }
+
+  initializeBoards();
+  getTasksByUser(userId).then(setTasks);
+}, [userId]);
+
 
   const handleDrop = async (taskId: string, newStatus: string) => {
     setTasks(prev =>
@@ -142,56 +155,18 @@ const Account: React.FC = () => {
             {statuses.map(status => {
               const board = boards.find(b => b.name === status);
               const color = board?.color || '#ccc';
-
+              const filteredTasks = tasks.filter(task => task.status === status);
               return (
-                <div
+                <BoardColumn
                   key={status}
-                  className="kanban-column"
-                  style={{ borderTop: `6px solid ${color}` }}
-                  onDragOver={e => e.preventDefault()}
-                  onDrop={e => {
-                    const taskId = e.dataTransfer.getData('task-id');
-                    handleDrop(taskId, status);
-                  }}
-                >
-                  <h3>
-                    {statusLabels[status] || status}
-                    <span className="kanban-column-buttons">
-                      <button className="add-btn" onClick={() => openEditModal()}>🞧</button>
-                      <button className="delete-btn" onClick={() => handleDeleteBoard(status)}>🞨</button>
-                    </span>
-                  </h3>
-
-                  {tasks
-                    .filter(task => task.status === status)
-                    .map(task => (
-                      <div
-                        key={task.id}
-                        className="kanban-task"
-                        draggable
-                        onDragStart={e => e.dataTransfer.setData('task-id', task.id!)}
-                      >
-                        <div className="task-content" onClick={() => openEditModal(task)}>
-                          <div className="task-header">
-                            <span className="task-title">{task.title}</span>
-                            <span className={`status-indicator ${task.status}`} />
-                          </div>
-                          <div className="task-meta">
-                            {task.deadline && (
-                              <span className="task-deadline">
-                                {new Date(task.deadline).toLocaleDateString()}
-                              </span>
-                            )}
-                            {task.priority && (
-                              <span className={`task-priority ${task.priority}`}>
-                                {task.priority}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                </div>
+                  status={status}
+                  color={color}
+                  tasks={filteredTasks}
+                  statusLabel={statusLabels[status] || status}
+                  onDrop={handleDrop}
+                  onOpenTaskModal={openEditModal}
+                  onDeleteBoard={handleDeleteBoard}
+                />
               );
             })}
           </div>

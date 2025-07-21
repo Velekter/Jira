@@ -19,6 +19,7 @@ export interface Task {
   description?: string;
   deadline?: number;
   priority?: 'low' | 'medium' | 'high';
+  color?: string;
 }
 
 const tasksRef = collection(db, 'tasks');
