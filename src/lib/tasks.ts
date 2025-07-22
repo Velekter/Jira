@@ -44,3 +44,11 @@ export const deleteTask = async (id: string) => {
   const taskRef = doc(db, 'tasks', id);
   await deleteDoc(taskRef);
 };
+
+export const moveTaskToCurrent = async (taskId: string, newStatus: string) => {
+  const taskRef = doc(db, 'tasks', taskId);
+  await updateDoc(taskRef, {
+    status: newStatus,
+    deadline: null,
+  });
+};

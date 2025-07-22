@@ -17,6 +17,7 @@ const statusLabels: Record<string, string> = {
   todo: 'TO DO',
   inProgress: 'IN PROGRESS',
   done: 'DONE',
+  upcoming: 'UPCOMING',
 };
 
 const DEFAULT_COLORS = ['#f8d471ff', '#5224fbff', '#4ADE80'];
@@ -88,12 +89,30 @@ const Account: React.FC = () => {
   useEffect(() => {
     function handleTaskSave(e: CustomEvent) {
       const { id, updatedTask } = e.detail;
+
+      if (
+        updatedTask.status === 'upcoming' &&
+        updatedTask.deadline !== undefined &&
+        updatedTask.deadline <= Date.now()
+      ) {
+        updatedTask.status = 'todo';
+      }
+
       setTasks(prev => prev.map(task => (task.id === id ? { ...task, ...updatedTask } : task)));
       updateTask(id, updatedTask);
     }
 
     function handleTaskCreate(e: CustomEvent) {
-      const { newTask } = e.detail;
+      let { newTask } = e.detail;
+
+      if (
+        newTask.status === 'upcoming' &&
+        newTask.deadline !== undefined &&
+        newTask.deadline <= Date.now()
+      ) {
+        newTask = { ...newTask, status: 'todo' };
+      }
+
       createTask({
         title: newTask.title,
         description: newTask.description,
@@ -144,9 +163,12 @@ const Account: React.FC = () => {
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Error: {error?.message}</p>;
 
-  const upcomingTasks = tasks.filter(task => {
-  return typeof task.deadline === 'number' && task.deadline > Date.now();
-});
+  const upcomingTasks = tasks.filter(
+    task =>
+      task.status === 'upcoming' && typeof task.deadline === 'number' && task.deadline > Date.now()
+  );
+
+  const currentTasks = tasks.filter(task => task.status !== 'upcoming');
 
   return (
     <>
@@ -165,7 +187,7 @@ const Account: React.FC = () => {
               {statuses.map(status => {
                 const board = boards.find(b => b.name === status);
                 const color = board?.color || '#ccc';
-                const filteredTasks = tasks.filter(task => task.status === status);
+                const filteredTasks = currentTasks.filter(task => task.status === status);
                 return (
                   <BoardColumn
                     key={status}
@@ -181,11 +203,15 @@ const Account: React.FC = () => {
               })}
             </div>
           ) : (
-            <UpcomingTasks tasks={upcomingTasks} onOpenTaskModal={openEditModal} />
+            <UpcomingTasks
+              tasks={upcomingTasks}
+              onOpenTaskModal={openEditModal}
+              statuses={statuses}
+            />
           )}
         </div>
 
-        <TaskModal ref={modalTaskRef} statuses={statuses} statusLabels={statusLabels} />
+        <TaskModal ref={modalTaskRef} statuses={statuses} statusLabels={statusLabels} mode={mode} />
       </div>
     </>
   );

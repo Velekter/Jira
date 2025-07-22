@@ -5,7 +5,7 @@
   transition: margin-left 0.3s ease;
 
   &.sidebar-open {
-    margin-left: 250px;
+    margin-left: 216px;
   }
 }
 
@@ -13,6 +13,13 @@
   flex: 1;
   padding: 40px 20px 0px 90px;
   overflow-y: auto;
+}
+
+p {
+  font-size: 1.1rem;
+  color: #777;
+  text-align: center;
+  margin-top: 40px;
 }
 
 .kanban {
@@ -61,7 +68,6 @@
   display: inline-block;
   margin-left: 8px;
 }
-
 
 .task-meta {
   display: flex;

@@ -57,15 +57,13 @@
         }
       }
     }
+
+    &.collapsed-sid {
+      padding: 55px 11px 40px 20px;
+    }
   }
 
   &.open .sidebar {
     left: 0;
-  }
-
-  &.collapsed-sid {
-    width: 66px;
-    padding: 55px 0 40px 0;
-    align-items: center; 
   }
 }

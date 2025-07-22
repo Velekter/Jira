@@ -1,7 +1,6 @@
 import React, { useRef } from 'react';
 import type { ModalRef } from '../Modal/Modal';
 import type { TaskModalRef } from '../TaskModal/TaskModal';
-import type { Task } from '../../lib/tasks';
 import './header.scss';
 import AddBoardModal from '../AddBoaedModal/AddBoardModal';
 import TaskModal from '../TaskModal/TaskModal';
@@ -17,11 +16,11 @@ const Header: React.FC<HeaderProps> = ({ isSidebarOpen, onCreateBoard, mode, set
   const modalRef = useRef<ModalRef>(null);
   const modalTaskRef = useRef<TaskModalRef>(null);
 
-  const handleClick = (task?: Task) => {
-    if (mode === 'upcoming'){
-      modalTaskRef.current?.open(task);
+  const handleClick = () => {
+    if (mode === 'upcoming') {
+      modalTaskRef.current?.open();
     } else {
-      
+      modalRef.current?.open();
     }
   };
 
@@ -40,7 +39,11 @@ const Header: React.FC<HeaderProps> = ({ isSidebarOpen, onCreateBoard, mode, set
         </button>
       </div>
       <AddBoardModal ref={modalRef} onCreateBoard={onCreateBoard} />
-      <TaskModal />
+      <TaskModal ref={modalTaskRef} statuses={mode === 'upcoming' ? [] : ['todo', 'inProgress', 'done']} statusLabels={{
+        todo: 'To Do',
+        inProgress: 'In Progress',
+        done: 'Done',
+      }} mode={mode} />
     </header>
   );
 };

@@ -13,132 +13,139 @@ export type TaskModalRef = {
 interface TaskModalProps {
   statuses: string[];
   statusLabels: Record<string, string>;
+  mode: 'current' | 'upcoming';
 }
 
-const TaskModal = forwardRef<TaskModalRef, TaskModalProps>(({ statuses, statusLabels }, ref) => {
-  const modalRef = useRef<ModalRef>(null);
+const TaskModal = forwardRef<TaskModalRef, TaskModalProps>(
+  ({ statuses, statusLabels, mode }, ref) => {
+    const modalRef = useRef<ModalRef>(null);
 
-  const [task, setTask] = useState<Task | null>(null);
-  const [title, setTitle] = useState('');
-  const [desc, setDesc] = useState('');
-  const [status, setStatus] = useState<Task['status']>('todo');
-  const [deadline, setDeadline] = useState('');
-  const [priority, setPriority] = useState<Task['priority']>('medium');
+    const [task, setTask] = useState<Task | null>(null);
+    const [title, setTitle] = useState('');
+    const [desc, setDesc] = useState('');
+    const [status, setStatus] = useState<Task['status']>('todo');
+    const [deadline, setDeadline] = useState('');
+    const [priority, setPriority] = useState<Task['priority']>('medium');
 
-  useImperativeHandle(ref, () => ({
-    open: (taskData?: Task) => {
-      if (taskData) {
-        setTask(taskData);
-        setTitle(taskData.title);
-        setDesc(taskData.description ?? '');
-        setStatus(taskData.status);
-        setDeadline(
-          taskData.deadline ? new Date(taskData.deadline).toISOString().split('T')[0] : ''
-        );
-        setPriority(taskData.priority ?? 'medium');
-      } else {
+    useImperativeHandle(ref, () => ({
+      open: (taskData?: Task) => {
+        if (taskData) {
+          setTask(taskData);
+          setTitle(taskData.title);
+          setDesc(taskData.description ?? '');
+          setStatus(taskData.status);
+          setDeadline(
+            taskData.deadline ? new Date(taskData.deadline).toISOString().split('T')[0] : ''
+          );
+          setPriority(taskData.priority ?? 'medium');
+        } else {
+          setTask(null);
+          setTitle('');
+          setDesc('');
+          setStatus(mode === 'upcoming' ? 'upcoming' : 'todo');
+          setDeadline('');
+          setPriority('medium');
+        }
+        modalRef.current?.open();
+      },
+      close: () => {
+        modalRef.current?.close();
         setTask(null);
-        setTitle('');
-        setDesc('');
-        setStatus('todo');
-        setDeadline('');
-        setPriority('medium');
-      }
-      modalRef.current?.open();
-    },
-    close: () => {
-      modalRef.current?.close();
-      setTask(null);
-    },
-  }));
+      },
+    }));
 
-  const handleSave = () => {
-    const baseTask = {
-      title,
-      description: desc,
-      status,
-      deadline: deadline ? new Date(deadline).getTime() : undefined,
-      priority,
-    };
-
-    if (task) {
-      window.dispatchEvent(
-        new CustomEvent('task-save', {
-          detail: { id: task.id, updatedTask: baseTask },
-        })
-      );
-    } else {
-      const newTask: Task = {
-        id: Date.now().toString(),
-        userId: localStorage.getItem('userId') ?? '',
-        ...baseTask,
+    const handleSave = () => {
+      const baseTask = {
+        title,
+        description: desc,
+        status,
+        deadline: deadline ? new Date(deadline).getTime() : undefined,
+        priority,
       };
 
-      window.dispatchEvent(
-        new CustomEvent('task-create', {
-          detail: { newTask },
-        })
-      );
-    }
+      if (task) {
+        window.dispatchEvent(
+          new CustomEvent('task-save', {
+            detail: { id: task.id, updatedTask: baseTask },
+          })
+        );
+      } else {
+        const newTask: Task = {
+          id: Date.now().toString(),
+          userId: localStorage.getItem('userId') ?? '',
+          ...baseTask,
+        };
 
-    modalRef.current?.close();
-    setTask(null);
-  };
+        window.dispatchEvent(
+          new CustomEvent('task-create', {
+            detail: { newTask },
+          })
+        );
+      }
 
-  const handleDelete = async () => {
-    if (!task) return;
-
-    try {
-      await deleteTask(task.id!);
-      window.dispatchEvent(
-        new CustomEvent('task-delete', {
-          detail: { id: task.id },
-        })
-      );
       modalRef.current?.close();
       setTask(null);
-    } catch (error) {
-      console.error('Delete failed', error);
-    }
-  };
+    };
 
-  return (
-    <Modal ref={modalRef}>
-      <h2>{task ? 'Edit Task' : 'New Task'}</h2>
+    const handleDelete = async () => {
+      if (!task) return;
 
-      <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Title" />
-      <textarea value={desc} onChange={e => setDesc(e.target.value)} placeholder="Description" />
-      <input type="date" value={deadline} onChange={e => setDeadline(e.target.value)} />
+      try {
+        await deleteTask(task.id!);
+        window.dispatchEvent(
+          new CustomEvent('task-delete', {
+            detail: { id: task.id },
+          })
+        );
+        modalRef.current?.close();
+        setTask(null);
+      } catch (error) {
+        console.error('Delete failed', error);
+      }
+    };
 
-      <select value={status} onChange={e => setStatus(e.target.value as Task['status'])}>
-        {statuses.map(s => (
-          <option key={s} value={s}>
-            {statusLabels[s] || s}
-          </option>
-        ))}
-      </select>
+    return (
+      <Modal ref={modalRef}>
+        <h2>{task ? 'Edit Task' : 'New Task'}</h2>
 
-      <select value={priority} onChange={e => setPriority(e.target.value as Task['priority'])}>
-        <option value="low">Low Priority</option>
-        <option value="medium">Medium Priority</option>
-        <option value="high">High Priority</option>
-      </select>
+        <input value={title} onChange={e => setTitle(e.target.value)} placeholder="Title" />
+        <textarea value={desc} onChange={e => setDesc(e.target.value)} placeholder="Description" />
+        <input type="date" value={deadline} onChange={e => setDeadline(e.target.value)} />
 
-      <div className="buttons">
-        {task && (
-          <button className="delete" onClick={handleDelete}>
-            Delete
-          </button>
+        {mode !== 'upcoming' ? (
+          <select value={status} onChange={e => setStatus(e.target.value as Task['status'])}>
+            {statuses.map(s => (
+              <option key={s} value={s}>
+                {statusLabels[s] || s}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <input type="hidden" value="upcoming" />
         )}
-        <div className="right-buttons">
-          <button onClick={handleSave}>{task ? 'Save' : 'Create'}</button>
-          <button className="cancel" onClick={() => modalRef.current?.close()}>
-            Cancel
-          </button>
+
+        <select value={priority} onChange={e => setPriority(e.target.value as Task['priority'])}>
+          <option value="low">Low Priority</option>
+          <option value="medium">Medium Priority</option>
+          <option value="high">High Priority</option>
+        </select>
+
+        <div className="buttons">
+          {task && (
+            <button className="delete" onClick={handleDelete}>
+              Delete
+            </button>
+          )}
+          <div className="right-buttons">
+            <button onClick={handleSave}>{task ? 'Save' : 'Create'}</button>
+            <button className="cancel" onClick={() => modalRef.current?.close()}>
+              Cancel
+            </button>
+          </div>
         </div>
-      </div>
-    </Modal>
-  );
-});
+      </Modal>
+    );
+  }
+);
 
 export default TaskModal;
