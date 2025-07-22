@@ -1,8 +1,8 @@
 import { useRef, useImperativeHandle, useState, forwardRef } from 'react';
 import Modal from '../Modal/Modal';
 import type { ModalRef } from '../Modal/Modal';
-import type { Task } from '../../lib/tasks/tasks';
-import { deleteTask } from '../../lib/tasks/tasks';
+import type { Task } from '../../lib/tasks';
+import { deleteTask } from '../../lib/tasks';
 import './taskModal.scss';
 
 export type TaskModalRef = {

@@ -1,5 +1,5 @@
 import React from 'react';
-import type { Task } from '../../lib/tasks/tasks';
+import type { Task } from '../../lib/tasks';
 import './boardColumn.scss';
 
 interface BoardColumnProps {
@@ -11,12 +11,6 @@ interface BoardColumnProps {
   onOpenTaskModal: (task?: Task) => void;
   onDeleteBoard: (status: string) => void;
 }
-
-const statusColors: Record<string, string> = {
-  todo: '#ffaf3e',
-  inProgress: '#4285f4',
-  done: '#34a853',
-};
 
 const BoardColumn: React.FC<BoardColumnProps> = ({
   status,

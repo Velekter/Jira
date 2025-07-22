@@ -2,16 +2,16 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useUserData } from '../../hooks/useUserData';
 import { logoutUser } from '../../lib/auth';
 import Sidebar from '../Sidebar/Sidebar';
-import type { Task } from '../../lib/tasks/tasks';
-import { getTasksByUser, createTask, updateTask } from '../../lib/tasks/tasks';
+import type { Task } from '../../lib/tasks';
+import { getTasksByUser, createTask, updateTask } from '../../lib/tasks';
 
 import './account.scss';
 import TaskModal from '../TaskModal/TaskModal';
 import type { TaskModalRef } from '../TaskModal/TaskModal';
 import Header from '../Header/Header';
-
 import { addBoard, getBoards, deleteBoard, updateBoard } from '../../lib/boards';
-import BoardColumn from '../BoardColumn/BoardColumn'
+import BoardColumn from '../BoardColumn/BoardColumn';
+import UpcomingTasks from '../UpcomingTasks/UpcomingTasks';
 
 const statusLabels: Record<string, string> = {
   todo: 'TO DO',
@@ -29,6 +29,7 @@ const Account: React.FC = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [statuses, setStatuses] = useState<string[]>([]);
   const [boards, setBoards] = useState<{ id: string; name: string; color?: string }[]>([]);
+  const [mode, setMode] = useState<'current' | 'upcoming'>('current');
 
   const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
   const modalTaskRef = useRef<TaskModalRef>(null);
@@ -38,45 +39,44 @@ const Account: React.FC = () => {
   };
 
   useEffect(() => {
-  if (!userId) return;
+    if (!userId) return;
 
-  async function initializeBoards() {
-    const boardsData = await getBoards(userId);
+    async function initializeBoards() {
+      const boardsData = await getBoards(userId);
 
-    if (boardsData.length === 0) {
-      const defaultBoards = ['todo', 'inProgress', 'done'];
-      const createdBoards = [];
+      if (boardsData.length === 0) {
+        const defaultBoards = ['todo', 'inProgress', 'done'];
+        const createdBoards = [];
 
-      for (let i = 0; i < defaultBoards.length; i++) {
-        const name = defaultBoards[i];
-        const color = DEFAULT_COLORS[i % DEFAULT_COLORS.length];
-        const id = await addBoard(userId, name, color);
-        createdBoards.push({ id, name, color });
+        for (let i = 0; i < defaultBoards.length; i++) {
+          const name = defaultBoards[i];
+          const color = DEFAULT_COLORS[i % DEFAULT_COLORS.length];
+          const id = await addBoard(userId, name, color);
+          createdBoards.push({ id, name, color });
+        }
+
+        setBoards(createdBoards);
+        setStatuses(createdBoards.map(b => b.name));
+      } else {
+        const updatedBoards = await Promise.all(
+          boardsData.map(async (board, i) => {
+            if (!board.color) {
+              const color = DEFAULT_COLORS[i % DEFAULT_COLORS.length];
+              await updateBoard(userId, board.id, { color });
+              return { ...board, color };
+            }
+            return board;
+          })
+        );
+
+        setBoards(updatedBoards);
+        setStatuses(updatedBoards.map(b => b.name));
       }
-
-      setBoards(createdBoards);
-      setStatuses(createdBoards.map(b => b.name));
-    } else {
-      const updatedBoards = await Promise.all(
-        boardsData.map(async (board, i) => {
-          if (!board.color) {
-            const color = DEFAULT_COLORS[i % DEFAULT_COLORS.length];
-            await updateBoard(userId, board.id, { color });
-            return { ...board, color };
-          }
-          return board;
-        })
-      );
-
-      setBoards(updatedBoards);
-      setStatuses(updatedBoards.map(b => b.name));
     }
-  }
 
-  initializeBoards();
-  getTasksByUser(userId).then(setTasks);
-}, [userId]);
-
+    initializeBoards();
+    getTasksByUser(userId).then(setTasks);
+  }, [userId]);
 
   const handleDrop = async (taskId: string, newStatus: string) => {
     setTasks(prev =>
@@ -144,32 +144,45 @@ const Account: React.FC = () => {
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Error: {error?.message}</p>;
 
+  const upcomingTasks = tasks.filter(task => {
+  return typeof task.deadline === 'number' && task.deadline > Date.now();
+});
+
   return (
     <>
-      <Header isSidebarOpen={isSidebarOpen} onCreateBoard={addBoardAndSave} />
+      <Header
+        isSidebarOpen={isSidebarOpen}
+        onCreateBoard={addBoardAndSave}
+        mode={mode}
+        setMode={setMode}
+      />
       <div className={`account-page ${isSidebarOpen ? 'sidebar-open' : ''}`}>
         <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} logoutUser={logoutUser} />
 
         <div className="container">
-          <div className="kanban">
-            {statuses.map(status => {
-              const board = boards.find(b => b.name === status);
-              const color = board?.color || '#ccc';
-              const filteredTasks = tasks.filter(task => task.status === status);
-              return (
-                <BoardColumn
-                  key={status}
-                  status={status}
-                  color={color}
-                  tasks={filteredTasks}
-                  statusLabel={statusLabels[status] || status}
-                  onDrop={handleDrop}
-                  onOpenTaskModal={openEditModal}
-                  onDeleteBoard={handleDeleteBoard}
-                />
-              );
-            })}
-          </div>
+          {mode === 'current' ? (
+            <div className="kanban">
+              {statuses.map(status => {
+                const board = boards.find(b => b.name === status);
+                const color = board?.color || '#ccc';
+                const filteredTasks = tasks.filter(task => task.status === status);
+                return (
+                  <BoardColumn
+                    key={status}
+                    status={status}
+                    color={color}
+                    tasks={filteredTasks}
+                    statusLabel={statusLabels[status] || status}
+                    onDrop={handleDrop}
+                    onOpenTaskModal={openEditModal}
+                    onDeleteBoard={handleDeleteBoard}
+                  />
+                );
+              })}
+            </div>
+          ) : (
+            <UpcomingTasks tasks={upcomingTasks} onOpenTaskModal={openEditModal} />
+          )}
         </div>
 
         <TaskModal ref={modalTaskRef} statuses={statuses} statusLabels={statusLabels} />
