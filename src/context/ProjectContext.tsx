@@ -5,6 +5,9 @@ import { getBoards } from '../lib/boards';
 export interface Project {
   id: string;
   name: string;
+  owner: string;
+  members: string[];
+  createdAt: number;
   boards?: { id: string; name: string; color?: string }[];
 }
 
@@ -76,13 +79,9 @@ export const ProjectProvider: React.FC<{ userId: string; children: React.ReactNo
   }, [userId]);
 
   const selectProject = async (project: Project) => {
-    const userId = localStorage.getItem('userId');
-    if (!userId) {
-      console.error('❌ UserId not found in localStorage');
-      return;
-    }
-
-    const boards = await getBoards(userId, project.id);
+    console.log('Selecting project:', project.id);
+    const boards = await getBoards(project.id);
+    console.log('Loaded boards for project:', project.id, boards);
     const updatedProject = { ...project, boards };
     setActiveProjectState(updatedProject);
     localStorage.setItem('activeProjectId', project.id);

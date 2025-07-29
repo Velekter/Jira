@@ -113,7 +113,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, logoutUser }) 
                   onDragLeave={handleProjectDragLeave}
                   onDrop={e => handleProjectDrop(e, index)}
                 >
-                  <span className="project-name">{project.name}</span>
+                  <div className="project-info">
+                    <span className="project-name">{project.name}</span>
+                    {project.owner === userId ? (
+                      <span className="project-owner owned">Owned</span>
+                    ) : (
+                      <span className="project-owner shared">Shared</span>
+                    )}
+                  </div>
                   <span className="drag-handle">⋮⋮</span>
                 </li>
               ))}

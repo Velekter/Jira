@@ -8,7 +8,7 @@ import './account.scss';
 import TaskModal from '../TaskModal/TaskModal';
 import type { TaskModalRef } from '../TaskModal/TaskModal';
 import Header from '../Header/Header';
-import { addBoard, getBoards, deleteBoard, updateBoard } from '../../lib/boards';
+import { addBoard, getBoards, deleteBoard, updateBoard, updateBoardOrder } from '../../lib/boards';
 import BoardColumn from '../BoardColumn/BoardColumn';
 import UpcomingTasks from '../UpcomingTasks/UpcomingTasks';
 import { useProjectContext } from '../../context/ProjectContext';
@@ -62,27 +62,12 @@ const Account: React.FC = () => {
 
     async function loadBoards() {
       const id = projectId as string;
-      const boardsData = await getBoards(userId, id);
+      console.log('Loading boards for project:', id);
+      const boardsData = await getBoards(id);
+      console.log('Loaded boards:', boardsData);
 
-      const savedOrder = localStorage.getItem(`boardOrder_${id}`);
-      let orderedBoards = boardsData;
-
-      if (savedOrder) {
-        try {
-          const orderArray = JSON.parse(savedOrder);
-          orderedBoards = orderArray
-            .map((boardId: string) => boardsData.find(b => b.id === boardId))
-            .filter(Boolean);
-
-          const newBoards = boardsData.filter(b => !orderArray.includes(b.id));
-          orderedBoards = [...orderedBoards, ...newBoards];
-        } catch (e) {
-          console.error('Error parsing board order:', e);
-        }
-      }
-
-      setBoards(orderedBoards);
-      setStatuses(orderedBoards.map(b => b.name));
+      setBoards(boardsData);
+      setStatuses(boardsData.map(b => b.name));
     }
 
     async function loadTasks() {
@@ -120,14 +105,25 @@ const Account: React.FC = () => {
     }
 
     function handleTaskCreate(e: CustomEvent) {
+      console.log('Account: Received task create event:', e.detail.newTask);
       const normalizedTask = normalizeUpcomingTask(e.detail.newTask);
+      console.log('Account: Normalized task:', normalizedTask);
+
+      if (!activeProject?.id) {
+        console.error('Account: No active project ID');
+        alert('Помилка: Проект не вибрано');
+        return;
+      }
 
       createTask({
         ...normalizedTask,
-        userId: activeProject?.id ?? '',
+        projectId: activeProject.id,
         createdAt: Date.now(),
       }).then(id => {
+        console.log('Account: Task created with ID:', id);
         setTasks(prev => [...prev, { ...normalizedTask, id, createdAt: Date.now() }]);
+      }).catch(error => {
+        console.error('Account: Failed to create task:', error);
       });
     }
 
@@ -141,7 +137,7 @@ const Account: React.FC = () => {
 
   const addBoardAndSave = async (boardName: string, color: string) => {
     if (!activeProject) return;
-    const newBoardId = await addBoard(userId, activeProject.id, boardName, color);
+    const newBoardId = await addBoard(activeProject.id, boardName, color);
     setBoards(prev => [...prev, { id: newBoardId, name: boardName, color }]);
     setStatuses(prev => [...prev, boardName]);
   };
@@ -152,7 +148,7 @@ const Account: React.FC = () => {
     if (confirmDelete) {
       const boardToDelete = boards.find(b => b.name === status);
       if (boardToDelete) {
-        await deleteBoard(userId, activeProject.id, boardToDelete.id);
+        await deleteBoard(activeProject.id, boardToDelete.id);
         setBoards(prev => prev.filter(b => b.id !== boardToDelete.id));
       }
       setStatuses(prev => prev.filter(s => s !== status));
@@ -165,7 +161,7 @@ const Account: React.FC = () => {
     const boardToUpdate = boards.find(b => b.name === oldStatus);
     if (!boardToUpdate) return;
 
-    await updateBoard(userId, activeProject.id, boardToUpdate.id, {
+    await updateBoard(activeProject.id, boardToUpdate.id, {
       name: newName,
       color: newColor,
     });
@@ -198,7 +194,7 @@ const Account: React.FC = () => {
     console.log('Column drag over');
   };
 
-  const handleColumnDrop = (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
+  const handleColumnDrop = async (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
     e.preventDefault();
     console.log('Column drop event triggered for index:', dropIndex);
     
@@ -233,9 +229,15 @@ const Account: React.FC = () => {
       const [dragged] = newBoards.splice(draggedIndex, 1);
       newBoards.splice(dropIndex, 0, dragged);
       console.log('New boards order:', newBoards);
-
-      const boardOrder = newBoards.map(b => b.id);
-      localStorage.setItem(`boardOrder_${activeProject?.id}`, JSON.stringify(boardOrder));
+      
+      // Зберігаємо порядок в базі даних
+      if (activeProject) {
+        const boardOrder = newBoards.map(b => b.id);
+        console.log('Saving board order to database:', boardOrder);
+        updateBoardOrder(activeProject.id, boardOrder).catch(error => {
+          console.error('Failed to update board order in database:', error);
+        });
+      }
       
       return newBoards;
     });

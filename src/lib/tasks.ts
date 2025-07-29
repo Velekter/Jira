@@ -15,24 +15,36 @@ export interface Task {
   title: string;
   status: string;
   createdAt?: number;
-  userId: string;
+  projectId: string; // Змінюємо userId на projectId
   description?: string;
-  deadline?: number;
+  deadline?: number | null;
   priority?: 'low' | 'medium' | 'high';
   color?: string;
 }
 
 const tasksRef = collection(db, 'tasks');
 
+// Функція для очищення undefined значень
+const cleanTaskData = (task: any) => {
+  const cleaned: any = {};
+  Object.keys(task).forEach(key => {
+    if (task[key] !== undefined) {
+      cleaned[key] = task[key];
+    }
+  });
+  return cleaned;
+};
+
 export const getTasksByUser = async (userId: string): Promise<Task[]> => {
-  const q = query(tasksRef, where('userId', '==', userId));
+  // Отримуємо всі завдання з проектів, де користувач є учасником
+  const q = query(tasksRef, where('projectId', 'in', [])); // Тут потрібно буде передавати список проектів
   const snapshot = await getDocs(q);
   return snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as Task) }));
 };
 
 export const getTasksByProject = async (projectId: string): Promise<Task[]> => {
   console.log('Getting tasks for project:', projectId);
-  const q = query(tasksRef, where('userId', '==', projectId));
+  const q = query(tasksRef, where('projectId', '==', projectId));
   const snapshot = await getDocs(q);
   const tasks = snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as Task) }));
   console.log('Retrieved tasks:', tasks);
@@ -40,7 +52,10 @@ export const getTasksByProject = async (projectId: string): Promise<Task[]> => {
 };
 
 export const createTask = async (task: Omit<Task, 'id'>): Promise<string> => {
-  const docRef = await addDoc(tasksRef, task);
+  console.log('Creating task with data:', task);
+  const cleanedTask = cleanTaskData(task);
+  console.log('Cleaned task data:', cleanedTask);
+  const docRef = await addDoc(tasksRef, cleanedTask);
   return docRef.id;
 };
 
@@ -48,7 +63,9 @@ export const updateTask = async (id: string, updates: Partial<Task>) => {
   console.log('Updating task:', id, 'with updates:', updates);
   try {
     const taskRef = doc(db, 'tasks', id);
-    await updateDoc(taskRef, updates);
+    const cleanedUpdates = cleanTaskData(updates);
+    console.log('Cleaned updates:', cleanedUpdates);
+    await updateDoc(taskRef, cleanedUpdates);
     console.log('Task updated successfully');
   } catch (error) {
     console.error('Error updating task:', error);

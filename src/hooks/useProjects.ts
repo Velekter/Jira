@@ -1,9 +1,12 @@
 import { db } from '../lib/firebase';
-import { collection, getDocs, addDoc } from 'firebase/firestore';
+import { collection, getDocs, addDoc, doc, setDoc, getDoc } from 'firebase/firestore';
 
 export interface Project {
   id: string;
   name: string;
+  owner: string;
+  members: string[];
+  createdAt: number;
 }
 
 const DEFAULT_BOARDS = [
@@ -13,24 +16,58 @@ const DEFAULT_BOARDS = [
 ];
 
 export const fetchProjects = async (userId: string): Promise<Project[]> => {
-  const snapshot = await getDocs(collection(db, `users/${userId}/projects`));
-  return snapshot.docs.map(doc => ({
+  console.log('Fetching projects for user:', userId);
+  
+  // Отримуємо всі проекти з колекції projects
+  const projectsSnapshot = await getDocs(collection(db, 'projects'));
+  const allProjects = projectsSnapshot.docs.map(doc => ({
     id: doc.id,
-    ...(doc.data() as { name: string }),
+    ...(doc.data() as { name: string; owner: string; members: string[]; createdAt: number }),
   }));
+  
+  console.log('All projects from collection:', allProjects);
+
+  // Фільтруємо проекти, де користувач є учасником
+  const userProjects = allProjects.filter(project => 
+    project.members.includes(userId)
+  );
+    
+  console.log('User projects:', userProjects);
+  
+  return userProjects;
 };
 
 export const createProjectHooks = async (userId: string, name: string, friends: string[] = []) => {
-  const docRef = await addDoc(collection(db, `users/${userId}/projects`), {
+  console.log('Creating project with:', { userId, name, friends });
+  
+  // Створюємо проект в колекції projects
+  const projectData = {
     name,
-    friends,
+    owner: userId,
+    members: [userId, ...friends],
     createdAt: Date.now(),
-  });
+  };
 
-  const boardsCollection = collection(db, `users/${userId}/projects/${docRef.id}/boards`);
-  for (const board of DEFAULT_BOARDS) {
-    await addDoc(boardsCollection, board);
+  console.log('Project data:', projectData);
+
+  const projectRef = await addDoc(collection(db, 'projects'), projectData);
+  const projectId = projectRef.id;
+  
+  console.log('Created project with ID:', projectId);
+
+  // Створюємо підколекцію boards для проекту
+  const boardsCollection = collection(db, `projects/${projectId}/boards`);
+  for (let i = 0; i < DEFAULT_BOARDS.length; i++) {
+    const board = DEFAULT_BOARDS[i];
+    await addDoc(boardsCollection, {
+      name: board.name,
+      color: board.color,
+      createdAt: Date.now(),
+      order: i,
+    });
   }
 
-  return docRef.id;
+  console.log('Created default boards for project');
+
+  return projectId;
 };

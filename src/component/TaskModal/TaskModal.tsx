@@ -59,9 +59,13 @@ const TaskModal = forwardRef<TaskModalRef, TaskModalProps>(
         title,
         description: desc,
         status,
-        deadline: deadline ? new Date(deadline).getTime() : undefined,
+        deadline: deadline ? new Date(deadline).getTime() : null,
         priority,
       };
+
+      console.log('TaskModal: Saving task with data:', baseTask);
+      console.log('TaskModal: Deadline value:', deadline);
+      console.log('TaskModal: Deadline timestamp:', deadline ? new Date(deadline).getTime() : null);
 
       if (task) {
         window.dispatchEvent(
@@ -70,8 +74,17 @@ const TaskModal = forwardRef<TaskModalRef, TaskModalProps>(
           })
         );
       } else {
+        const projectId = localStorage.getItem('activeProjectId') ?? '';
+        console.log('TaskModal: Using projectId:', projectId);
+        
+        if (!projectId) {
+          console.error('TaskModal: No projectId found in localStorage');
+          alert('Помилка: Проект не вибрано');
+          return;
+        }
+        
         const newTask: Task = {
-          userId: localStorage.getItem('userId') ?? '',
+          projectId,
           ...baseTask,
         };
 
