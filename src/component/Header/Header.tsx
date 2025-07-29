@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import type { ModalRef } from '../Modal/Modal';
 import type { TaskModalRef } from '../TaskModal/TaskModal';
 import './header.scss';
-import AddBoardModal from '../AddBoaedModal/AddBoardModal';
+import AddBoardModal from '../AddBoardModal/AddBoardModal';
 import TaskModal from '../TaskModal/TaskModal';
 
 interface HeaderProps {

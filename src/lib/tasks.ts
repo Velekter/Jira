@@ -30,14 +30,30 @@ export const getTasksByUser = async (userId: string): Promise<Task[]> => {
   return snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as Task) }));
 };
 
+export const getTasksByProject = async (projectId: string): Promise<Task[]> => {
+  console.log('Getting tasks for project:', projectId);
+  const q = query(tasksRef, where('userId', '==', projectId));
+  const snapshot = await getDocs(q);
+  const tasks = snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as Task) }));
+  console.log('Retrieved tasks:', tasks);
+  return tasks;
+};
+
 export const createTask = async (task: Omit<Task, 'id'>): Promise<string> => {
   const docRef = await addDoc(tasksRef, task);
   return docRef.id;
 };
 
 export const updateTask = async (id: string, updates: Partial<Task>) => {
-  const taskRef = doc(db, 'tasks', id);
-  await updateDoc(taskRef, updates);
+  console.log('Updating task:', id, 'with updates:', updates);
+  try {
+    const taskRef = doc(db, 'tasks', id);
+    await updateDoc(taskRef, updates);
+    console.log('Task updated successfully');
+  } catch (error) {
+    console.error('Error updating task:', error);
+    throw error;
+  }
 };
 
 export const deleteTask = async (id: string) => {

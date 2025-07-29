@@ -3,8 +3,7 @@ import { useUserData } from '../../hooks/useUserData';
 import { logoutUser } from '../../lib/auth';
 import Sidebar from '../Sidebar/Sidebar';
 import type { Task } from '../../lib/tasks';
-import { getTasksByUser, createTask, updateTask } from '../../lib/tasks';
-
+import { createTask, updateTask, getTasksByProject } from '../../lib/tasks';
 import './account.scss';
 import TaskModal from '../TaskModal/TaskModal';
 import type { TaskModalRef } from '../TaskModal/TaskModal';
@@ -12,6 +11,8 @@ import Header from '../Header/Header';
 import { addBoard, getBoards, deleteBoard, updateBoard } from '../../lib/boards';
 import BoardColumn from '../BoardColumn/BoardColumn';
 import UpcomingTasks from '../UpcomingTasks/UpcomingTasks';
+import { useProjectContext } from '../../context/ProjectContext';
+import CreateProject from '../CreateProject/CreateProject';
 
 const statusLabels: Record<string, string> = {
   todo: 'TO DO',
@@ -20,139 +21,142 @@ const statusLabels: Record<string, string> = {
   upcoming: 'UPCOMING',
 };
 
-const DEFAULT_COLORS = ['#f8d471ff', '#5224fbff', '#4ADE80'];
+const normalizeUpcomingTask = (task: Task) => {
+  if (task.status === 'upcoming' && task.deadline && task.deadline <= Date.now()) {
+    return { ...task, status: 'todo' };
+  }
+  return task;
+};
 
 const Account: React.FC = () => {
   const userId = localStorage.getItem('userId') ?? '';
-  const { data, isLoading, isError, error } = useUserData(userId);
+  const { projects, activeProject } = useProjectContext();
+  const { isLoading, isError, error } = useUserData(userId);
 
+  const [showCreateProject, setShowCreateProject] = useState(projects.length === 0);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [statuses, setStatuses] = useState<string[]>([]);
   const [boards, setBoards] = useState<{ id: string; name: string; color?: string }[]>([]);
   const [mode, setMode] = useState<'current' | 'upcoming'>('current');
+  const [draggedColumnIndex, setDraggedColumnIndex] = useState<number | null>(null);
+  const [dragOverColumnIndex, setDragOverColumnIndex] = useState<number | null>(null);
 
-  const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
   const modalTaskRef = useRef<TaskModalRef>(null);
 
-  const openEditModal = (task?: Task) => {
-    modalTaskRef.current?.open(task);
-  };
+  const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
+  const openEditModal = (task?: Task) => modalTaskRef.current?.open(task);
 
   useEffect(() => {
-    if (!userId) return;
+    if (projects.length > 0) {
+      setShowCreateProject(false);
+    } else {
+      setShowCreateProject(true);
+    }
+  }, [projects]);
 
-    async function initializeBoards() {
-      const boardsData = await getBoards(userId);
+  const projectId = activeProject?.id;
 
-      if (boardsData.length === 0) {
-        const defaultBoards = ['todo', 'inProgress', 'done'];
-        const createdBoards = [];
+  useEffect(() => {
+    if (!projectId || !userId) return;
 
-        for (let i = 0; i < defaultBoards.length; i++) {
-          const name = defaultBoards[i];
-          const color = DEFAULT_COLORS[i % DEFAULT_COLORS.length];
-          const id = await addBoard(userId, name, color);
-          createdBoards.push({ id, name, color });
+    async function loadBoards() {
+      const id = projectId as string;
+      const boardsData = await getBoards(userId, id);
+      
+      // Завантажуємо збережений порядок колонок
+      const savedOrder = localStorage.getItem(`boardOrder_${id}`);
+      let orderedBoards = boardsData;
+
+      if (savedOrder) {
+        try {
+          const orderArray = JSON.parse(savedOrder);
+          // Сортуємо колонки за збереженим порядком
+          orderedBoards = orderArray
+            .map((boardId: string) => boardsData.find(b => b.id === boardId))
+            .filter(Boolean);
+          
+          // Додаємо нові колонки, які не були в збереженому порядку
+          const newBoards = boardsData.filter(b => !orderArray.includes(b.id));
+          orderedBoards = [...orderedBoards, ...newBoards];
+        } catch (e) {
+          console.error('Error parsing board order:', e);
         }
-
-        setBoards(createdBoards);
-        setStatuses(createdBoards.map(b => b.name));
-      } else {
-        const updatedBoards = await Promise.all(
-          boardsData.map(async (board, i) => {
-            if (!board.color) {
-              const color = DEFAULT_COLORS[i % DEFAULT_COLORS.length];
-              await updateBoard(userId, board.id, { color });
-              return { ...board, color };
-            }
-            return board;
-          })
-        );
-
-        setBoards(updatedBoards);
-        setStatuses(updatedBoards.map(b => b.name));
       }
+
+      setBoards(orderedBoards);
+      setStatuses(orderedBoards.map(b => b.name));
     }
 
-    initializeBoards();
-    getTasksByUser(userId).then(setTasks);
-  }, [userId]);
+    async function loadTasks() {
+      const tasksData = await getTasksByProject(projectId as string);
+      console.log('Loaded tasks:', tasksData);
+      setTasks(tasksData);
+    }
+
+    loadBoards();
+    loadTasks();
+  }, [projectId, userId]);
 
   const handleDrop = async (taskId: string, newStatus: string) => {
+    console.log('Dropping task:', taskId, 'to status:', newStatus);
     setTasks(prev =>
       prev.map(task => (task.id === taskId ? { ...task, status: newStatus } : task))
     );
-    await updateTask(taskId, { status: newStatus });
+    try {
+      await updateTask(taskId, { status: newStatus });
+    } catch (error) {
+      console.error('Failed to update task in database:', error);
+      // Відкатуємо локальні зміни, якщо оновлення в базі даних не вдалося
+      setTasks(prev =>
+        prev.map(task => (task.id === taskId ? { ...task, status: task.status } : task))
+      );
+    }
   };
 
   useEffect(() => {
     function handleTaskSave(e: CustomEvent) {
       const { id, updatedTask } = e.detail;
+      const normalizedTask = normalizeUpcomingTask(updatedTask);
 
-      if (
-        updatedTask.status === 'upcoming' &&
-        updatedTask.deadline !== undefined &&
-        updatedTask.deadline <= Date.now()
-      ) {
-        updatedTask.status = 'todo';
-      }
-
-      setTasks(prev => prev.map(task => (task.id === id ? { ...task, ...updatedTask } : task)));
-      updateTask(id, updatedTask);
+      setTasks(prev => prev.map(task => (task.id === id ? { ...task, ...normalizedTask } : task)));
+      updateTask(id, normalizedTask);
     }
 
     function handleTaskCreate(e: CustomEvent) {
-      let { newTask } = e.detail;
-
-      if (
-        newTask.status === 'upcoming' &&
-        newTask.deadline !== undefined &&
-        newTask.deadline <= Date.now()
-      ) {
-        newTask = { ...newTask, status: 'todo' };
-      }
+      const normalizedTask = normalizeUpcomingTask(e.detail.newTask);
 
       createTask({
-        title: newTask.title,
-        description: newTask.description,
-        status: newTask.status,
-        deadline: newTask.deadline,
-        priority: newTask.priority,
+        ...normalizedTask,
+        userId: activeProject?.id ?? '',
         createdAt: Date.now(),
-        userId: newTask.userId,
       }).then(id => {
-        setTasks(prev => [...prev, { ...newTask, id, createdAt: Date.now() }]);
+        setTasks(prev => [...prev, { ...normalizedTask, id, createdAt: Date.now() }]);
       });
     }
 
     window.addEventListener('task-save', handleTaskSave as EventListener);
     window.addEventListener('task-create', handleTaskCreate as EventListener);
-
     return () => {
       window.removeEventListener('task-save', handleTaskSave as EventListener);
       window.removeEventListener('task-create', handleTaskCreate as EventListener);
     };
-  }, [setTasks]);
+  }, [activeProject]);
 
   const addBoardAndSave = async (boardName: string, color: string) => {
-    if (boardName && !statuses.includes(boardName)) {
-      const newBoardId = await addBoard(userId, boardName, color);
-      setBoards(prev => [...prev, { id: newBoardId, name: boardName, color }]);
-      setStatuses(prev => [...prev, boardName]);
-    } else {
-      alert('Invalid or existing board name');
-    }
+    if (!activeProject) return;
+    const newBoardId = await addBoard(userId, activeProject.id, boardName, color);
+    setBoards(prev => [...prev, { id: newBoardId, name: boardName, color }]);
+    setStatuses(prev => [...prev, boardName]);
   };
 
   const handleDeleteBoard = async (status: string) => {
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete the board "${status}"? All tasks with this status will be lost.`
-    );
+    if (!activeProject) return;
+    const confirmDelete = window.confirm(`Delete board "${status}" and its tasks?`);
     if (confirmDelete) {
       const boardToDelete = boards.find(b => b.name === status);
       if (boardToDelete) {
-        await deleteBoard(userId, boardToDelete.id);
+        await deleteBoard(userId, activeProject.id, boardToDelete.id);
         setBoards(prev => prev.filter(b => b.id !== boardToDelete.id));
       }
       setStatuses(prev => prev.filter(s => s !== status));
@@ -160,15 +164,98 @@ const Account: React.FC = () => {
     }
   };
 
+  const handleUpdateBoard = async (oldStatus: string, newName: string, newColor: string) => {
+    if (!activeProject) return;
+    const boardToUpdate = boards.find(b => b.name === oldStatus);
+    if (!boardToUpdate) return;
+
+    await updateBoard(userId, activeProject.id, boardToUpdate.id, {
+      name: newName,
+      color: newColor,
+    });
+
+    setBoards(prev =>
+      prev.map(b => (b.id === boardToUpdate.id ? { ...b, name: newName, color: newColor } : b))
+    );
+
+    setStatuses(prev => prev.map(s => (s === oldStatus ? newName : s)));
+
+    setTasks(prev => prev.map(t => (t.status === oldStatus ? { ...t, status: newName } : t)));
+  };
+
+  const handleColumnDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
+    console.log('Starting drag for column:', index);
+    setDraggedColumnIndex(index);
+    e.dataTransfer.setData('draggedColumnIndex', index.toString());
+    e.dataTransfer.effectAllowed = 'move';
+    console.log('Column drag data set:', index.toString());
+  };
+
+  const handleColumnDragEnd = () => {
+    setDraggedColumnIndex(null);
+    setDragOverColumnIndex(null);
+  };
+
+  const handleColumnDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault(); // Щоб дозволити drop
+    e.dataTransfer.dropEffect = 'move';
+    console.log('Column drag over');
+  };
+
+  const handleColumnDrop = (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
+    e.preventDefault();
+    console.log('Column drop event triggered for index:', dropIndex);
+    
+    const draggedIndexStr = e.dataTransfer.getData('draggedColumnIndex');
+    console.log('Dragged column index string:', draggedIndexStr);
+    
+    if (!draggedIndexStr) {
+      console.log('No dragged column index found');
+      return;
+    }
+
+    const draggedIndex = Number(draggedIndexStr);
+    console.log('Dragged column index number:', draggedIndex);
+    
+    if (draggedIndex === dropIndex) {
+      console.log('Same column index, no reordering needed');
+      return;
+    }
+
+    console.log('Reordering columns:', draggedIndex, 'to', dropIndex);
+
+    setStatuses(prev => {
+      const newStatuses = [...prev];
+      const [dragged] = newStatuses.splice(draggedIndex, 1);
+      newStatuses.splice(dropIndex, 0, dragged);
+      console.log('New statuses order:', newStatuses);
+      return newStatuses;
+    });
+
+    setBoards(prev => {
+      const newBoards = [...prev];
+      const [dragged] = newBoards.splice(draggedIndex, 1);
+      newBoards.splice(dropIndex, 0, dragged);
+      console.log('New boards order:', newBoards);
+      
+      // Зберігаємо порядок колонок в localStorage
+      const boardOrder = newBoards.map(b => b.id);
+      localStorage.setItem(`boardOrder_${activeProject?.id}`, JSON.stringify(boardOrder));
+      
+      return newBoards;
+    });
+  };
+
   if (isLoading) return <p>Loading...</p>;
   if (isError) return <p>Error: {error?.message}</p>;
 
   const upcomingTasks = tasks.filter(
-    task =>
-      task.status === 'upcoming' && typeof task.deadline === 'number' && task.deadline > Date.now()
+    t => t.status === 'upcoming' && typeof t.deadline === 'number' && t.deadline > Date.now()
   );
-
   const currentTasks = tasks.filter(task => task.status !== 'upcoming');
+
+  console.log('Current tasks:', currentTasks);
+  console.log('Upcoming tasks:', upcomingTasks);
 
   return (
     <>
@@ -180,28 +267,41 @@ const Account: React.FC = () => {
       />
       <div className={`account-page ${isSidebarOpen ? 'sidebar-open' : ''}`}>
         <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} logoutUser={logoutUser} />
-
         <div className="container">
           {mode === 'current' ? (
-            <div className="kanban">
-              {statuses.map(status => {
-                const board = boards.find(b => b.name === status);
-                const color = board?.color || '#ccc';
-                const filteredTasks = currentTasks.filter(task => task.status === status);
-                return (
-                  <BoardColumn
-                    key={status}
-                    status={status}
-                    color={color}
-                    tasks={filteredTasks}
-                    statusLabel={statusLabels[status] || status}
-                    onDrop={handleDrop}
-                    onOpenTaskModal={openEditModal}
-                    onDeleteBoard={handleDeleteBoard}
-                  />
-                );
-              })}
-            </div>
+            <>
+              {showCreateProject ? (
+                <CreateProject userId={userId} setShowCreateProject={setShowCreateProject} />
+              ) : (
+                <div className="kanban">
+                  {statuses.map((status, index) => {
+                    const board = boards.find(b => b.name === status);
+                    const color = board?.color || '#ccc';
+                    const filteredTasks = currentTasks.filter(task => task.status === status);
+                    return (
+                      <BoardColumn
+                        key={status}
+                        status={status}
+                        color={color}
+                        tasks={filteredTasks}
+                        statusLabel={statusLabels[status] || status}
+                        onDrop={handleDrop}
+                        onOpenTaskModal={openEditModal}
+                        onDeleteBoard={handleDeleteBoard}
+                        onUpdateBoard={handleUpdateBoard}
+                        draggable
+                        onDragStart={e => handleColumnDragStart(e, index)}
+                        onDragEnd={handleColumnDragEnd}
+                        onDragOver={handleColumnDragOver}
+                        onDropColumn={e => handleColumnDrop(e, index)}
+                        isDragging={draggedColumnIndex === index}
+                        isDragOver={dragOverColumnIndex === index}
+                      />
+                    );
+                  })}
+                </div>
+              )}
+            </>
           ) : (
             <UpcomingTasks
               tasks={upcomingTasks}
@@ -210,7 +310,6 @@ const Account: React.FC = () => {
             />
           )}
         </div>
-
         <TaskModal ref={modalTaskRef} statuses={statuses} statusLabels={statusLabels} mode={mode} />
       </div>
     </>

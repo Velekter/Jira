@@ -26,6 +26,8 @@ p {
   display: flex;
   gap: 2rem;
   height: 100%;
+  min-height: 500px;
+  padding: 1rem 0;
 }
 
 .kanban-task {
@@ -34,9 +36,13 @@ p {
   border-radius: 10px;
   padding: 0.75rem 1rem;
   margin-bottom: 1rem;
-  cursor: pointer;
+  cursor: grab;
   transition: box-shadow 0.2s ease;
   user-select: none;
+
+  &:active {
+    cursor: grabbing;
+  }
 
   &:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);

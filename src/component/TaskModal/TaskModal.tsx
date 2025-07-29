@@ -71,7 +71,6 @@ const TaskModal = forwardRef<TaskModalRef, TaskModalProps>(
         );
       } else {
         const newTask: Task = {
-          id: Date.now().toString(),
           userId: localStorage.getItem('userId') ?? '',
           ...baseTask,
         };
