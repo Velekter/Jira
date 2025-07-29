@@ -8,7 +8,7 @@ interface AddBoardModalProps {
   onUpdateBoard?: (boardName: string, color: string) => void;
   initialName?: string;
   initialColor?: string;
-  isEdit?: boolean; // прапорець, чи це редагування
+  isEdit?: boolean;
 }
 
 const COLORS = [
@@ -31,7 +31,6 @@ const AddBoardModal = forwardRef<ModalRef, AddBoardModalProps>(
 
     useImperativeHandle(ref, () => ({
       open: () => {
-        // Коли відкриваємо — скидаємо стани до початкових значень
         setBoardName(initialName);
         setSelectedColor(initialColor);
         modalRef.current?.open();
@@ -39,7 +38,6 @@ const AddBoardModal = forwardRef<ModalRef, AddBoardModalProps>(
       close: () => modalRef.current?.close(),
     }));
 
-    // Якщо змінили initialName або initialColor зовні — оновити локальні стани
     useEffect(() => {
       setBoardName(initialName);
       setSelectedColor(initialColor);

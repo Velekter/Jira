@@ -50,7 +50,6 @@ const BoardColumn: React.FC<BoardColumnProps> = ({
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
     console.log('BoardColumn drag start triggered');
     
-    // Перевіряємо, чи drag починається з заголовка колонки
     const target = e.target as HTMLElement;
     const h3Element = target.closest('h3');
     const buttonsElement = target.closest('.kanban-column-buttons');
@@ -64,8 +63,7 @@ const BoardColumn: React.FC<BoardColumnProps> = ({
     console.log('Drag handle element:', dragHandleElement);
     console.log('Is header drag:', isHeaderDrag);
     console.log('Is task drag:', isTaskDrag);
-    
-    // Якщо це drag колонки (з заголовка або з будь-якого місця в колонці, крім завдань)
+
     if (isHeaderDrag || (!isTaskDrag && target.closest('.kanban-column'))) {
       console.log('Starting column drag');
       setIsDragging(true);
@@ -73,7 +71,6 @@ const BoardColumn: React.FC<BoardColumnProps> = ({
         onDragStart(e);
       }
     } else if (!isTaskDrag) {
-      // Якщо drag не з заголовка і не з завдання, то блокуємо drag колонки
       console.log('Preventing drag - not from header or task');
       e.preventDefault();
     }
@@ -102,8 +99,7 @@ const BoardColumn: React.FC<BoardColumnProps> = ({
     e.preventDefault();
     setIsDragOver(false);
     console.log('BoardColumn drop event triggered');
-    
-    // Спочатку перевіряємо, чи це drop колонки
+
     const draggedColumnIndex = e.dataTransfer.getData('draggedColumnIndex');
     console.log('Dragged column index:', draggedColumnIndex);
     
@@ -112,8 +108,7 @@ const BoardColumn: React.FC<BoardColumnProps> = ({
       onDropColumn(e);
       return;
     }
-    
-    // Якщо це не колонка, то це завдання
+
     const taskId = e.dataTransfer.getData('task-id');
     console.log('Task ID:', taskId);
     
@@ -134,12 +129,12 @@ const BoardColumn: React.FC<BoardColumnProps> = ({
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      <h3 title="Перетягніть заголовок для зміни порядку колонок">
+      <h3 title="Drag the header to reorder columns">
         <span style={{ cursor: 'pointer' }} onClick={openEditModal} title="Edit board">
           {statusLabel}
         </span>
         <span className="kanban-column-buttons">
-          <span className="drag-handle" title="Перетягніть для зміни порядку">⋮⋮</span>
+          <span className="drag-handle" title="Drag to reorder">⋮⋮</span>
           <button className="add-btn" onClick={() => onOpenTaskModal()}>
             🞧
           </button>

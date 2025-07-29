@@ -63,20 +63,17 @@ const Account: React.FC = () => {
     async function loadBoards() {
       const id = projectId as string;
       const boardsData = await getBoards(userId, id);
-      
-      // Завантажуємо збережений порядок колонок
+
       const savedOrder = localStorage.getItem(`boardOrder_${id}`);
       let orderedBoards = boardsData;
 
       if (savedOrder) {
         try {
           const orderArray = JSON.parse(savedOrder);
-          // Сортуємо колонки за збереженим порядком
           orderedBoards = orderArray
             .map((boardId: string) => boardsData.find(b => b.id === boardId))
             .filter(Boolean);
-          
-          // Додаємо нові колонки, які не були в збереженому порядку
+
           const newBoards = boardsData.filter(b => !orderArray.includes(b.id));
           orderedBoards = [...orderedBoards, ...newBoards];
         } catch (e) {
@@ -107,7 +104,6 @@ const Account: React.FC = () => {
       await updateTask(taskId, { status: newStatus });
     } catch (error) {
       console.error('Failed to update task in database:', error);
-      // Відкатуємо локальні зміни, якщо оновлення в базі даних не вдалося
       setTasks(prev =>
         prev.map(task => (task.id === taskId ? { ...task, status: task.status } : task))
       );
@@ -197,7 +193,7 @@ const Account: React.FC = () => {
   };
 
   const handleColumnDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault(); // Щоб дозволити drop
+    e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
     console.log('Column drag over');
   };
@@ -237,8 +233,7 @@ const Account: React.FC = () => {
       const [dragged] = newBoards.splice(draggedIndex, 1);
       newBoards.splice(dropIndex, 0, dragged);
       console.log('New boards order:', newBoards);
-      
-      // Зберігаємо порядок колонок в localStorage
+
       const boardOrder = newBoards.map(b => b.id);
       localStorage.setItem(`boardOrder_${activeProject?.id}`, JSON.stringify(boardOrder));
       

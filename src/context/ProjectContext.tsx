@@ -29,26 +29,22 @@ export const ProjectProvider: React.FC<{ userId: string; children: React.ReactNo
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Завантаження проєктів
   const refreshProjects = async () => {
     if (!userId) return;
     try {
       setIsLoading(true);
       const fetched = await fetchProjects(userId);
 
-      // Завантажуємо збережений порядок проектів
       const savedOrder = localStorage.getItem('projectOrder');
       let orderedProjects = fetched;
 
       if (savedOrder) {
         try {
           const orderArray = JSON.parse(savedOrder);
-          // Сортуємо проекти за збереженим порядком
           orderedProjects = orderArray
             .map((id: string) => fetched.find(p => p.id === id))
             .filter(Boolean);
-          
-          // Додаємо нові проекти, які не були в збереженому порядку
+
           const newProjects = fetched.filter(p => !orderArray.includes(p.id));
           orderedProjects = [...orderedProjects, ...newProjects];
         } catch (e) {
@@ -79,21 +75,19 @@ export const ProjectProvider: React.FC<{ userId: string; children: React.ReactNo
     refreshProjects();
   }, [userId]);
 
-  // Вибір проекту з завантаженням дощок
   const selectProject = async (project: Project) => {
-    const userId = localStorage.getItem('userId'); // або передай з пропсів
+    const userId = localStorage.getItem('userId');
     if (!userId) {
       console.error('❌ UserId not found in localStorage');
       return;
     }
 
-    const boards = await getBoards(userId, project.id); // передаємо два аргументи!
+    const boards = await getBoards(userId, project.id);
     const updatedProject = { ...project, boards };
     setActiveProjectState(updatedProject);
     localStorage.setItem('activeProjectId', project.id);
   };
 
-  // Зміна порядку проектів
   const reorderProjects = (draggedIndex: number, dropIndex: number) => {
     console.log('reorderProjects called with:', draggedIndex, dropIndex);
     setProjects(prev => {
@@ -104,7 +98,6 @@ export const ProjectProvider: React.FC<{ userId: string; children: React.ReactNo
       
       console.log('New projects order:', newProjects);
       
-      // Зберігаємо порядок в localStorage
       const projectOrder = newProjects.map(p => p.id);
       localStorage.setItem('projectOrder', JSON.stringify(projectOrder));
       

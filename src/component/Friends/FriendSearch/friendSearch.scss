@@ -1,79 +1,185 @@
 .friend-search {
-  background: #1e293b;
-  color: white;
-  padding: 20px;
-  border-radius: 12px;
-  width: 100%;
-  max-width: 500px;
-  margin: 0 auto;
-
   h2 {
-    margin-bottom: 20px;
-    text-align: center;
-    color: #60a5fa;
+    margin-bottom: 0.5rem;
+  }
+
+  .search-description {
+    color: #94a3b8;
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+    font-weight: 400;
   }
 
   .search-bar {
     display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
 
     input {
       flex: 1;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      background-color: #0f172a;
+      padding: 0.75rem 1rem;
+      border: 1px solid rgba(96, 165, 250, 0.2);
+      border-radius: 10px;
+      background: rgba(15, 23, 42, 0.6);
       color: white;
-      transition: border-color 0.3s, box-shadow 0.3s;
+      font-size: 0.875rem;
+      transition: all 0.2s ease;
+
+      &::placeholder {
+        color: #64748b;
+      }
 
       &:focus {
         outline: none;
         border-color: #60a5fa;
-        box-shadow: 0 0 0 2px rgba(96, 165, 250, 0.5);
+        box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+        background: rgba(15, 23, 42, 0.8);
       }
     }
 
     button {
-      padding: 10px 16px;
-      background: #60a5fa;
+      padding: 0.75rem 1.5rem;
+      background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 100%);
       border: none;
-      border-radius: 8px;
+      border-radius: 10px;
       color: white;
+      font-weight: 600;
       cursor: pointer;
-      transition: background-color 0.3s, opacity 0.3s;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      &:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(96, 165, 250, 0.3);
+      }
 
       &:disabled {
         opacity: 0.6;
         cursor: not-allowed;
+        transform: none;
+      }
+
+      .spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top: 2px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
       }
     }
   }
 
   .result {
-    background-color: #0f172a;
-    padding: 12px;
-    border-radius: 10px;
+    background: rgba(15, 23, 42, 0.6);
+    border: 1px solid rgba(96, 165, 250, 0.2);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-top: 1rem;
 
-    p {
-      margin: 0 0 10px 0;
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+
+      .user-avatar {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, #60a5fa 0%, #38bdf8 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 1.1rem;
+        color: white;
+        flex-shrink: 0;
+      }
+
+      .user-details {
+        flex: 1;
+        min-width: 0;
+
+        .user-name {
+          font-weight: 600;
+          color: #e2e8f0;
+          margin: 0 0 0.25rem 0;
+          font-size: 0.95rem;
+        }
+
+        .user-email {
+          color: #94a3b8;
+          margin: 0;
+          font-size: 0.85rem;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+      }
     }
 
-    button {
-      background: #38bdf8;
+    .send-request-btn {
+      background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
       border: none;
-      padding: 8px 14px;
-      border-radius: 6px;
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
       color: white;
+      font-weight: 500;
       cursor: pointer;
-      transition: background-color 0.3s;
+      transition: all 0.2s ease;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+
+      &:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(56, 189, 248, 0.3);
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .spinner {
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-top: 2px solid white;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
     }
   }
 
   .not-found {
-    color: #f87171;
     text-align: center;
-    margin-top: 10px;
+    margin-top: 1rem;
+    color: #f87171;
+
+    .not-found-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      opacity: 0.7;
+    }
+
+    p {
+      margin: 0 0 0.25rem 0;
+      font-weight: 500;
+      font-size: 1rem;
+
+      &.not-found-subtitle {
+        color: #94a3b8;
+        font-size: 0.85rem;
+        font-weight: 400;
+      }
+    }
   }
 
   @media (max-width: 480px) {
@@ -86,4 +192,9 @@
       }
     }
   }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }

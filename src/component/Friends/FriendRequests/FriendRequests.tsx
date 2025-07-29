@@ -97,50 +97,49 @@ export default function FriendRequests() {
   }, [currentUserId]);
 
   const acceptRequest = async (request: FriendRequest) => {
-  try {
-    const { from, to, id } = request;
+    try {
+      const { from, to, id } = request;
 
-    const fromRef = doc(db, 'users', from);
-    const toRef = doc(db, 'users', to);
+      const fromRef = doc(db, 'users', from);
+      const toRef = doc(db, 'users', to);
 
-    const [fromSnap, toSnap] = await Promise.all([getDoc(fromRef), getDoc(toRef)]);
+      const [fromSnap, toSnap] = await Promise.all([getDoc(fromRef), getDoc(toRef)]);
 
-    if (!fromSnap.exists() || !toSnap.exists()) {
-      console.error('One or both users not found');
-      return;
+      if (!fromSnap.exists() || !toSnap.exists()) {
+        console.error('One or both users not found');
+        return;
+      }
+
+      const fromData = fromSnap.data();
+      const toData = toSnap.data();
+
+      console.log('Before update fromData.friends:', fromData.friends);
+      console.log('Before update toData.friends:', toData.friends);
+
+      await updateDoc(doc(db, 'friendRequests', id), { status: 'accepted' });
+
+      await Promise.all([
+        updateDoc(fromRef, {
+          friends: {
+            ...(fromData.friends || {}),
+            [to]: true,
+          },
+        }),
+        updateDoc(toRef, {
+          friends: {
+            ...(toData.friends || {}),
+            [from]: true,
+          },
+        }),
+      ]);
+
+      const fromSnapAfter = await getDoc(fromRef);
+      console.log('After update fromData.friends:', fromSnapAfter.data()?.friends);
+
+    } catch (error) {
+      console.error('Error in acceptRequest:', error);
     }
-
-    const fromData = fromSnap.data();
-    const toData = toSnap.data();
-
-    console.log('Before update fromData.friends:', fromData.friends);
-    console.log('Before update toData.friends:', toData.friends);
-
-    await updateDoc(doc(db, 'friendRequests', id), { status: 'accepted' });
-
-    await Promise.all([
-      updateDoc(fromRef, {
-        friends: {
-          ...(fromData.friends || {}),
-          [to]: true,
-        },
-      }),
-      updateDoc(toRef, {
-        friends: {
-          ...(toData.friends || {}),
-          [from]: true,
-        },
-      }),
-    ]);
-
-    const fromSnapAfter = await getDoc(fromRef);
-    console.log('After update fromData.friends:', fromSnapAfter.data()?.friends);
-
-  } catch (error) {
-    console.error('Error in acceptRequest:', error);
-  }
-};
-
+  };
 
   const rejectRequest = async (id: string) => {
     await deleteDoc(doc(db, 'friendRequests', id));
@@ -150,42 +149,86 @@ export default function FriendRequests() {
     await deleteDoc(doc(db, 'friendRequests', id));
   };
 
-  if (loading) return <p>Loading requests...</p>;
+  if (loading) {
+    return (
+      <div className="friend-requests">
+        <h2>Friend Requests</h2>
+        <div className="loading-state">
+          <div className="loading-spinner"></div>
+          <p>Loading requests...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="friend-requests">
-      <h2>Incoming Friend Requests</h2>
-      {incoming.length === 0 ? (
-        <p>No incoming requests</p>
-      ) : (
-        <ul>
-          {incoming.map(req => (
-            <li key={req.id}>
-              <p>
-                {req.fromUser?.fullName} ({req.fromUser?.email})
-              </p>
-              <button onClick={() => acceptRequest(req)}>Accept</button>
-              <button onClick={() => rejectRequest(req.id)}>Reject</button>
-            </li>
-          ))}
-        </ul>
-      )}
+      <h2>Friend Requests</h2>
+      
+      <div className="requests-section">
+        <h3>Incoming Requests</h3>
+        {incoming.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-icon">📥</div>
+            <p>No incoming requests</p>
+          </div>
+        ) : (
+          <ul>
+            {incoming.map(req => (
+              <li key={req.id}>
+                <div className="user-info">
+                  <div className="user-avatar">
+                    {req.fromUser?.fullName?.charAt(0)?.toUpperCase() || '?'}
+                  </div>
+                  <div className="user-details">
+                    <p className="user-name">{req.fromUser?.fullName}</p>
+                    <p className="user-email">{req.fromUser?.email}</p>
+                  </div>
+                </div>
+                <div className="friend-actions">
+                  <button className="accept" onClick={() => acceptRequest(req)}>
+                    Accept
+                  </button>
+                  <button className="reject" onClick={() => rejectRequest(req.id)}>
+                    Reject
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
-      <h2>Outgoing Friend Requests</h2>
-      {outgoing.length === 0 ? (
-        <p>No outgoing requests</p>
-      ) : (
-        <ul>
-          {outgoing.map(req => (
-            <li key={req.id}>
-              <p>
-                {req.toUser?.fullName} ({req.toUser?.email})
-              </p>
-              <button onClick={() => cancelRequest(req.id)}>Cancel</button>
-            </li>
-          ))}
-        </ul>
-      )}
+      <div className="requests-section">
+        <h3>Outgoing Requests</h3>
+        {outgoing.length === 0 ? (
+          <div className="empty-state">
+            <div className="empty-icon">📤</div>
+            <p>No outgoing requests</p>
+          </div>
+        ) : (
+          <ul>
+            {outgoing.map(req => (
+              <li key={req.id}>
+                <div className="user-info">
+                  <div className="user-avatar">
+                    {req.toUser?.fullName?.charAt(0)?.toUpperCase() || '?'}
+                  </div>
+                  <div className="user-details">
+                    <p className="user-name">{req.toUser?.fullName}</p>
+                    <p className="user-email">{req.toUser?.email}</p>
+                  </div>
+                </div>
+                <div className="friend-actions">
+                  <button className="cancel" onClick={() => cancelRequest(req.id)}>
+                    Cancel
+                  </button>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
     </div>
   );
 }

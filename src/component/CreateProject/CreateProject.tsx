@@ -32,7 +32,6 @@ const CreateProject: React.FC<CreateProjectProps> = ({ userId, setShowCreateProj
 
     await createProjectHooks(userId, projectName, selectedFriends);
 
-    // Оновлюємо список і вибираємо активний проєкт автоматично
     await refreshProjects();
 
     setShowCreateProject(false);

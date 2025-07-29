@@ -56,33 +56,78 @@ export default function FriendSearch() {
     mutationFn: sendFriendRequest,
   });
 
+  const handleSearch = () => {
+    if (email.trim()) {
+      mutate(email.trim());
+    }
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSearch();
+    }
+  };
+
   return (
     <div className="friend-search">
       <h2>Find Friends</h2>
+      <p className="search-description">Search for friends by their email address</p>
+      
       <div className="search-bar">
         <input
           type="email"
-          placeholder="Enter user email"
+          placeholder="Enter friend's email address"
           value={email}
           onChange={e => setEmail(e.target.value)}
+          onKeyPress={handleKeyPress}
         />
-        <button onClick={() => mutate(email)} disabled={searching || !email}>
-          {searching ? 'Searching...' : 'Search'}
+        <button onClick={handleSearch} disabled={searching || !email.trim()}>
+          {searching ? (
+            <>
+              <div className="spinner"></div>
+              Searching...
+            </>
+          ) : (
+            'Search'
+          )}
         </button>
       </div>
 
       {foundUser && (
         <div className="result">
-          <p>
-            <strong>{foundUser.fullName}</strong> – {foundUser.email}
-          </p>
-          <button onClick={() => sendRequest(foundUser.id)} disabled={sending}>
-            {sending ? 'Sending...' : 'Send Friend Request'}
+          <div className="user-info">
+            <div className="user-avatar">
+              {foundUser.fullName?.charAt(0)?.toUpperCase() || '?'}
+            </div>
+            <div className="user-details">
+              <p className="user-name">{foundUser.fullName}</p>
+              <p className="user-email">{foundUser.email}</p>
+            </div>
+          </div>
+          <button 
+            onClick={() => sendRequest(foundUser.id)} 
+            disabled={sending}
+            className="send-request-btn"
+          >
+            {sending ? (
+              <>
+                <div className="spinner"></div>
+                Sending...
+              </>
+            ) : (
+              'Send Friend Request'
+            )}
           </button>
         </div>
       )}
 
-      {hasSearched && foundUser === null && <p className="not-found">User not found</p>}
+      {hasSearched && foundUser === null && (
+        <div className="not-found">
+          <div className="not-found-icon">🔍</div>
+          <p>User not found</p>
+          <p className="not-found-subtitle">Make sure the email address is correct</p>
+        </div>
+      )}
     </div>
   );
 }
