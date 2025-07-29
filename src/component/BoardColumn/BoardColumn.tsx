@@ -10,7 +10,7 @@ interface BoardColumnProps {
   tasks: Task[];
   statusLabel: string;
   onDrop: (taskId: string, newStatus: string) => void;
-  onOpenTaskModal: (task?: Task) => void;
+  onOpenTaskModal: (task?: Task, defaultStatus?: string) => void;
   onDeleteBoard: (status: string) => void;
   onUpdateBoard: (status: string, newName: string, newColor: string) => void;
   draggable?: boolean;
@@ -135,7 +135,10 @@ const BoardColumn: React.FC<BoardColumnProps> = ({
         </span>
         <span className="kanban-column-buttons">
           <span className="drag-handle" title="Drag to reorder">⋮⋮</span>
-          <button className="add-btn" onClick={() => onOpenTaskModal()}>
+          <button className="add-btn" onClick={() => {
+            console.log('BoardColumn: Opening task modal with status:', status);
+            onOpenTaskModal(undefined, status);
+          }}>
             🞧
           </button>
           <button className="delete-btn" onClick={() => onDeleteBoard(status)}>

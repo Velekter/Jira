@@ -62,7 +62,7 @@ export default function FriendsList() {
     if (!selectedFriend || !userId) return;
 
     try {
-      // Видаляємо друга з обох сторін
+  
       const userRef = doc(db, 'users', userId);
       const friendRef = doc(db, 'users', selectedFriend.id);
 

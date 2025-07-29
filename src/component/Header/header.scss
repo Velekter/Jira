@@ -3,6 +3,7 @@
   background-color: #334155;
   width: 100%;
   padding-left: 90px;
+  position: relative;
 
   transition: padding-left 0.3s ease;
 
@@ -14,7 +15,36 @@
     color: #f1f5f9;
     font-size: 28px;
     font-weight: 600;
-    margin-bottom: 6px;
+    margin: 0;
+  }
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .project-settings-btn {
+    background-color: #475569 ;
+    color: white ;
+    font-size: 14px ;
+    font-weight: bold ;
+    padding: 8px 16px ;
+    border-radius: 8px ;
+    cursor: pointer ;
+    transition: all 0.2s ease ;
+    border: none ;
+    text-decoration: none ;
+    display: inline-block ;
+    margin: 10px 10px 0 0;
+
+    &:hover {
+      background-color: #64748b ;
+      color: white ;
+      text-decoration: none ;
+    }
   }
 
   .kanban-header__buttons {

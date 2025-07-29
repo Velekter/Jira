@@ -1,9 +1,11 @@
-import React, { useRef } from 'react';
+import React, { useRef, useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import type { ModalRef } from '../Modal/Modal';
 import type { TaskModalRef } from '../TaskModal/TaskModal';
 import './header.scss';
 import AddBoardModal from '../AddBoardModal/AddBoardModal';
 import TaskModal from '../TaskModal/TaskModal';
+import { useProjectContext } from '../../context/ProjectContext';
 
 interface HeaderProps {
   isSidebarOpen: boolean;
@@ -13,6 +15,8 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ isSidebarOpen, onCreateBoard, mode, setMode }) => {
+  const { activeProject } = useProjectContext();
+  const navigate = useNavigate();
   const modalRef = useRef<ModalRef>(null);
   const modalTaskRef = useRef<TaskModalRef>(null);
 
@@ -25,8 +29,16 @@ const Header: React.FC<HeaderProps> = ({ isSidebarOpen, onCreateBoard, mode, set
   };
 
   return (
-    <header className={`dashboard-header ${isSidebarOpen ? 'sidebar-open' : ''}`}>
-      <h1>Kanban Dashboard</h1>
+                <header className={`dashboard-header ${isSidebarOpen ? 'sidebar-open' : ''}`}>
+        <div className="header-top">
+          <h1>Kanban Dashboard</h1>
+          <Link
+            className="project-settings-btn"
+            to={'/account/settings'} 
+          >
+            ⋯
+          </Link>
+        </div>
       <div className="kanban-header__buttons">
         <button className={mode === 'upcoming' ? 'active' : ''} onClick={() => setMode('upcoming')}>
           Upcoming Tasks
@@ -34,16 +46,22 @@ const Header: React.FC<HeaderProps> = ({ isSidebarOpen, onCreateBoard, mode, set
         <button className={mode === 'current' ? 'active' : ''} onClick={() => setMode('current')}>
           Current Task
         </button>
+
         <button className="add-board-btn" onClick={handleClick}>
           {mode === 'upcoming' ? '+ Add Task' : '+ Add Board'}
         </button>
       </div>
       <AddBoardModal ref={modalRef} onCreateBoard={onCreateBoard} />
-      <TaskModal ref={modalTaskRef} statuses={mode === 'upcoming' ? [] : ['todo', 'inProgress', 'done']} statusLabels={{
-        todo: 'To Do',
-        inProgress: 'In Progress',
-        done: 'Done',
-      }} mode={mode} />
+      <TaskModal
+        ref={modalTaskRef}
+        statuses={mode === 'upcoming' ? [] : ['todo', 'inProgress', 'done']}
+        statusLabels={{
+          todo: 'To Do',
+          inProgress: 'In Progress',
+          done: 'Done',
+        }}
+        mode={mode}
+      />
     </header>
   );
 };

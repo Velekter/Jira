@@ -2,7 +2,7 @@ import React, { useRef, useState } from 'react';
 import './sidebar.scss';
 import menuIcon from './img/menu.png';
 import UserAvatar from '../UserAvatar/UserAvatar';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useProjectContext } from '../../context/ProjectContext';
 import CreateProject from '../CreateProject/CreateProject';
 import Modal from '../Modal/Modal';
@@ -19,6 +19,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, logoutUser }) 
   const modalRef = useRef<ModalRef>(null);
   const [draggedProjectIndex, setDraggedProjectIndex] = useState<number | null>(null);
   const [dragOverIndex, setDragOverIndex] = useState<number | null>(null);
+  const location = useLocation();
 
   const userId = localStorage.getItem('userId') ?? '';
 
@@ -73,6 +74,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, logoutUser }) 
     setDragOverIndex(null);
   };
 
+  const isActiveRoute = (path: string) => {
+    return location.pathname === path;
+  };
+
   return (
     <div className={`sidebar-container ${isOpen ? 'open' : 'collapsed'}`}>
       <button className="toggle-button" onClick={toggleSidebar}>
@@ -80,55 +85,76 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, logoutUser }) 
       </button>
 
       <div className={`sidebar ${isOpen ? 'open' : 'collapsed-sid'}`}>
-        <ul>
-          <li>Dashboard</li>
-          <li>Tasks</li>
-          <li>Settings</li>
-          <li>
-            <button onClick={logoutUser}>Logout</button>
+        <ul className="navigation-menu">
+          <li className={isActiveRoute('/account') ? 'active' : ''}>
+            <Link to="/account">
+              <span className="nav-icon">📊</span>
+              {isOpen && <span className="nav-text">Dashboard</span>}
+            </Link>
+          </li>
+          <li className={isActiveRoute('/account/friend') ? 'active' : ''}>
+            <Link to="/account/friend">
+              <span className="nav-icon">👥</span>
+              {isOpen && <span className="nav-text">Friends</span>}
+            </Link>
+          </li>
+          <li className={isActiveRoute('/account/settings') ? 'active' : ''}>
+            <Link to="/account/settings">
+              <span className="nav-icon">⚙️</span>
+              {isOpen && <span className="nav-text">Settings</span>}
+            </Link>
           </li>
           <li>
-            <Link to="/account/friend">Friend</Link>
+            <button onClick={logoutUser} className="logout-btn">
+              <span className="nav-icon">🚪</span>
+              {isOpen && <span className="nav-text">Logout</span>}
+            </button>
           </li>
         </ul>
 
         <div className="project-list">
-          <h4>Projects</h4>
-          {projects.length > 0 && (
-            <ul>
-              {projects.map((project, index) => (
-                <li
-                  key={project.id}
-                  className={`${activeProject?.id === project.id ? 'active' : ''} ${
-                    draggedProjectIndex === index ? 'dragging' : ''
-                  } ${dragOverIndex === index ? 'drag-over' : ''}`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveProject(project);
-                  }}
-                  draggable
-                  onDragStart={e => handleProjectDragStart(e, index)}
-                  onDragEnd={handleProjectDragEnd}
-                  onDragOver={e => handleProjectDragOver(e, index)}
-                  onDragLeave={handleProjectDragLeave}
-                  onDrop={e => handleProjectDrop(e, index)}
-                >
-                  <div className="project-info">
-                    <span className="project-name">{project.name}</span>
-                    {project.owner === userId ? (
-                      <span className="project-owner owned">Owned</span>
-                    ) : (
-                      <span className="project-owner shared">Shared</span>
-                    )}
-                  </div>
-                  <span className="drag-handle">⋮⋮</span>
-                </li>
-              ))}
-            </ul>
-          )}
+          <div className="sidebar-divider" />
           <button className="add-project-btn" onClick={() => modalRef.current?.open()}>
-            + Add Project
+            <span className="btn-icon">+</span>
+            {isOpen && <span className="btn-text">Add Project</span>}
           </button>
+          {projects.length > 0 && (
+            <div className="projects-scroll-container">
+              <ul>
+                {projects.map((project, index) => (
+                  <li
+                    key={project.id}
+                    className={`${activeProject?.id === project.id ? 'active' : ''} ${
+                      draggedProjectIndex === index ? 'dragging' : ''
+                    } ${dragOverIndex === index ? 'drag-over' : ''}`}
+                    data-project-initial={project.name.charAt(0)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveProject(project);
+                    }}
+                    draggable
+                    onDragStart={e => handleProjectDragStart(e, index)}
+                    onDragEnd={handleProjectDragEnd}
+                    onDragOver={e => handleProjectDragOver(e, index)}
+                    onDragLeave={handleProjectDragLeave}
+                    onDrop={e => handleProjectDrop(e, index)}
+                  >
+                    <div className="project-info">
+                      <span className="project-name">{project.name}</span>
+                      {isOpen && (
+                        project.owner === userId ? (
+                          <span className="project-owner owned">Owned</span>
+                        ) : (
+                          <span className="project-owner shared">Shared</span>
+                        )
+                      )}
+                    </div>
+                    {isOpen && <span className="drag-handle">⋮⋮</span>}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
         <Modal ref={modalRef}>

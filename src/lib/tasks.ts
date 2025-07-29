@@ -15,7 +15,7 @@ export interface Task {
   title: string;
   status: string;
   createdAt?: number;
-  projectId: string; // Змінюємо userId на projectId
+  projectId: string;
   description?: string;
   deadline?: number | null;
   priority?: 'low' | 'medium' | 'high';
@@ -24,7 +24,7 @@ export interface Task {
 
 const tasksRef = collection(db, 'tasks');
 
-// Функція для очищення undefined значень
+
 const cleanTaskData = (task: any) => {
   const cleaned: any = {};
   Object.keys(task).forEach(key => {
@@ -36,8 +36,7 @@ const cleanTaskData = (task: any) => {
 };
 
 export const getTasksByUser = async (userId: string): Promise<Task[]> => {
-  // Отримуємо всі завдання з проектів, де користувач є учасником
-  const q = query(tasksRef, where('projectId', 'in', [])); // Тут потрібно буде передавати список проектів
+  const q = query(tasksRef, where('projectId', 'in', []));
   const snapshot = await getDocs(q);
   return snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as Task) }));
 };

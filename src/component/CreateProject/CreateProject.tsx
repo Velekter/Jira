@@ -24,7 +24,7 @@ const CreateProject: React.FC<CreateProjectProps> = ({ userId, setShowCreateProj
 
   const { refreshProjects } = useProjectContext();
 
-  // Завантажуємо друзів користувача
+  
   useEffect(() => {
     if (!userId) return;
 

@@ -45,7 +45,7 @@ const Account: React.FC = () => {
   const modalTaskRef = useRef<TaskModalRef>(null);
 
   const toggleSidebar = () => setIsSidebarOpen(prev => !prev);
-  const openEditModal = (task?: Task) => modalTaskRef.current?.open(task);
+  const openEditModal = (task?: Task, defaultStatus?: string) => modalTaskRef.current?.open(task, defaultStatus);
 
   useEffect(() => {
     if (projects.length > 0) {
@@ -111,7 +111,7 @@ const Account: React.FC = () => {
 
       if (!activeProject?.id) {
         console.error('Account: No active project ID');
-        alert('Помилка: Проект не вибрано');
+        alert('Error: No project selected');
         return;
       }
 
@@ -229,8 +229,7 @@ const Account: React.FC = () => {
       const [dragged] = newBoards.splice(draggedIndex, 1);
       newBoards.splice(dropIndex, 0, dragged);
       console.log('New boards order:', newBoards);
-      
-      // Зберігаємо порядок в базі даних
+
       if (activeProject) {
         const boardOrder = newBoards.map(b => b.id);
         console.log('Saving board order to database:', boardOrder);

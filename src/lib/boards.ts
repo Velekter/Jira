@@ -14,10 +14,10 @@ export const addBoard = async (
   name: string,
   color: string
 ): Promise<string> => {
-  // Використовуємо колекцію projects для дошок
+  
   const boardsRef = collection(db, 'projects', projectId, 'boards');
   
-  // Отримуємо поточний порядок дошок
+  
   const existingBoards = await getBoards(projectId);
   const maxOrder = existingBoards.length > 0 ? Math.max(...existingBoards.map(b => b.order || 0)) : -1;
   
@@ -38,7 +38,7 @@ export async function getBoards(projectId: string): Promise<Board[]> {
     return [];
   }
 
-  // Використовуємо колекцію projects для отримання дошок
+  
   const boardsRef = collection(db, 'projects', projectId, 'boards');
 
   const q = query(boardsRef);
@@ -46,7 +46,7 @@ export async function getBoards(projectId: string): Promise<Board[]> {
 
   const boards = snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as Omit<Board, 'id'>) }));
 
-  // Сортуємо дошки за порядком
+  
   boards.sort((a, b) => (a.order || 0) - (b.order || 0));
 
   console.log('Fetched boards for project:', projectId, boards);
@@ -55,7 +55,7 @@ export async function getBoards(projectId: string): Promise<Board[]> {
 }
 
 export async function deleteBoard(projectId: string, boardId: string) {
-  // Використовуємо колекцію projects для видалення дошок
+
   const boardRef = doc(db, 'projects', projectId, 'boards', boardId);
   await deleteDoc(boardRef);
 }
@@ -65,7 +65,7 @@ export async function updateBoard(
   boardId: string,
   updates: Partial<Board>
 ) {
-  // Використовуємо колекцію projects для оновлення дошок
+
   const boardRef = doc(db, 'projects', projectId, 'boards', boardId);
   await updateDoc(boardRef, updates);
 }

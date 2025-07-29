@@ -6,7 +6,7 @@ import { deleteTask } from '../../lib/tasks';
 import './taskModal.scss';
 
 export type TaskModalRef = {
-  open: (task?: Task) => void;
+  open: (task?: Task, defaultStatus?: string) => void;
   close: () => void;
 };
 
@@ -28,7 +28,8 @@ const TaskModal = forwardRef<TaskModalRef, TaskModalProps>(
     const [priority, setPriority] = useState<Task['priority']>('medium');
 
     useImperativeHandle(ref, () => ({
-      open: (taskData?: Task) => {
+      open: (taskData?: Task, defaultStatus?: string) => {
+        console.log('TaskModal: Opening with taskData:', taskData, 'defaultStatus:', defaultStatus);
         if (taskData) {
           setTask(taskData);
           setTitle(taskData.title);
@@ -42,7 +43,7 @@ const TaskModal = forwardRef<TaskModalRef, TaskModalProps>(
           setTask(null);
           setTitle('');
           setDesc('');
-          setStatus(mode === 'upcoming' ? 'upcoming' : 'todo');
+          setStatus(defaultStatus || (mode === 'upcoming' ? 'upcoming' : 'todo'));
           setDeadline('');
           setPriority('medium');
         }
@@ -79,7 +80,7 @@ const TaskModal = forwardRef<TaskModalRef, TaskModalProps>(
         
         if (!projectId) {
           console.error('TaskModal: No projectId found in localStorage');
-          alert('Помилка: Проект не вибрано');
+          alert('Error: No project selected');
           return;
         }
         
