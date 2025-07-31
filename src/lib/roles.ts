@@ -54,16 +54,13 @@ export function canDeleteProject(userRole: ProjectRole | null): boolean {
 }
 
 export function canLeaveProject(userRole: ProjectRole | null): boolean {
-  // Всі ролі можуть покинути проект, крім власника
   return userRole !== 'owner';
 }
 
 export function getAvailableRoles(currentUserRole: ProjectRole): ProjectRole[] {
   const roles: ProjectRole[] = ['viewer', 'editor', 'admin'];
-
   if (currentUserRole === 'owner') {
     roles.push('owner');
   }
-
   return roles;
 }

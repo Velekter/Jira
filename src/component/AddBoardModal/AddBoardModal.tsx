@@ -73,7 +73,6 @@ const AddBoardModal = forwardRef<ModalRef, AddBoardModalProps>(
             onChange={e => setBoardName(e.target.value)}
             required
           />
-
           <div className="color-picker">
             <label>Select color:</label>
             <div className="color-options">
@@ -87,7 +86,6 @@ const AddBoardModal = forwardRef<ModalRef, AddBoardModalProps>(
               ))}
             </div>
           </div>
-
           <div className="buttons">
             <button type="submit">{isEdit ? 'Save' : 'Create'}</button>
             <button type="button" onClick={() => modalRef.current?.close()}>
