@@ -43,7 +43,7 @@ const Header: React.FC<HeaderProps> = ({ isSidebarOpen, onCreateBoard, mode, set
     <header className={`dashboard-header ${isSidebarOpen ? 'sidebar-open' : ''}`}>
       <div className="header-top">
         <h1>Kanban Dashboard</h1>
-        {canManageMembers(userRole) && (
+        {activeProject && (
           <Link className="project-settings-btn" to={'/account/settings'}>
             ⋯
           </Link>

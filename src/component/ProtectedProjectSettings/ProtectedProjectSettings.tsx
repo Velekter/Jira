@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProjectContext } from '../../context/ProjectContext';
-import { getUserRole, canManageMembers } from '../../lib/roles';
+import { getUserRole } from '../../lib/roles';
 import ProjectSettings from '../ProjectSettings/ProjectSettings';
 
 const ProtectedProjectSettings: React.FC = () => {
@@ -16,11 +16,10 @@ const ProtectedProjectSettings: React.FC = () => {
       return;
     }
 
+    // Перевіряємо, чи користувач є учасником проекту
     const userRole = getUserRole(activeProject, userId);
-    if (!canManageMembers(userRole)) {
-      alert(
-        'Error: You do not have permission to access project settings. You need Admin or higher role.'
-      );
+    if (!userRole) {
+      alert('Error: You are not a member of this project.');
       navigate('/account');
       return;
     }
@@ -31,8 +30,8 @@ const ProtectedProjectSettings: React.FC = () => {
   }
 
   const userRole = getUserRole(activeProject, userId);
-  if (!canManageMembers(userRole)) {
-    return <div>Access denied</div>;
+  if (!userRole) {
+    return <div>Access denied - You are not a member of this project</div>;
   }
 
   return <ProjectSettings onClose={() => navigate('/account')} />;

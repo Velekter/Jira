@@ -10,6 +10,7 @@ import {
   getUserRole,
   canManageMembers,
   canDeleteProject,
+  canLeaveProject,
 } from '../../lib/roles';
 import { useNavigate } from 'react-router-dom';
 import './projectSettings.scss';
@@ -46,6 +47,7 @@ const ProjectSettings: React.FC<ProjectSettingsProps> = () => {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [leaving, setLeaving] = useState(false);
   const [friendSearch, setFriendSearch] = useState('');
   const [saveMessage, setSaveMessage] = useState('');
 
@@ -56,18 +58,14 @@ const ProjectSettings: React.FC<ProjectSettingsProps> = () => {
       return;
     }
 
-    if (!canManageMembers(userRole)) {
-      alert(
-        'Error: You do not have permission to access project settings. You need Admin or higher role.'
-      );
-      navigate('/account');
-      return;
-    }
-
     if (activeProject) {
       setProjectName(activeProject.name);
-      loadAvailableFriends();
+      // Завантажуємо учасників для всіх ролей, щоб вони могли бачити список
       loadCurrentMembers();
+      // Завантажуємо друзів тільки якщо користувач має права адміністратора
+      if (canManageMembers(userRole)) {
+        loadAvailableFriends();
+      }
     }
   }, [activeProject, userRole, navigate]);
 
@@ -190,6 +188,13 @@ const ProjectSettings: React.FC<ProjectSettingsProps> = () => {
   const removeMember = async (memberId: string) => {
     if (!activeProject) return;
 
+    // Перевіряємо, чи не є користувач власником проекту
+    const memberToRemove = activeProject.memberRoles.find(member => member.userId === memberId);
+    if (memberToRemove?.role === 'owner') {
+      alert('Cannot remove the project owner. The owner can only delete the project.');
+      return;
+    }
+
     const confirmRemove = window.confirm('Are you sure you want to remove this member?');
     if (!confirmRemove) return;
 
@@ -251,6 +256,47 @@ const ProjectSettings: React.FC<ProjectSettingsProps> = () => {
     }
   };
 
+  const handleLeaveProject = async () => {
+    if (!activeProject) return;
+
+    if (!canLeaveProject(userRole)) {
+      alert(
+        'Error: You cannot leave this project because you are the owner. You can only delete the project.'
+      );
+      return;
+    }
+
+    const confirmLeave = window.confirm(
+      'Are you sure you want to leave this project? You will lose access to it.'
+    );
+
+    if (!confirmLeave) return;
+
+    try {
+      setLeaving(true);
+      const projectRef = doc(db, 'projects', activeProject.id);
+      
+      // Видаляємо користувача з списку учасників
+      const updatedMembers = activeProject.members.filter(id => id !== currentUserId);
+      const updatedMemberRoles = activeProject.memberRoles.filter(
+        member => member.userId !== currentUserId
+      );
+
+      await updateDoc(projectRef, {
+        members: updatedMembers,
+        memberRoles: updatedMemberRoles,
+      });
+      
+      await refreshProjects();
+      navigate('/account');
+    } catch (error) {
+      console.error('Error leaving project:', error);
+      alert('Error leaving project. Please try again.');
+    } finally {
+      setLeaving(false);
+    }
+  };
+
   const handleDelete = async () => {
     if (!activeProject) return;
 
@@ -290,151 +336,230 @@ const ProjectSettings: React.FC<ProjectSettingsProps> = () => {
         <button className="back-btn" onClick={() => (window.location.href = '/account')}>
           ← Back
         </button>
-        <h1>Project Settings</h1>
+        <h1>
+          {canManageMembers(userRole) ? 'Project Settings' : 'Project Information'}
+        </h1>
       </div>
       {saveMessage && <div className="save-message">{saveMessage}</div>}
       <div className="page-content">
-        <div className="setting-section">
-          <h3>Project Name</h3>
-          <input
-            type="text"
-            value={projectName}
-            onChange={e => setProjectName(e.target.value)}
-            placeholder="Enter project name"
-            className="project-name-input"
-          />
-        </div>
-
-        <div className="setting-section">
-          <h3>Current Members</h3>
-          <div className="members-list">
-            {currentMembers.map(member => (
-              <div key={member.userId} className="member-item">
-                <div className="member-info">
-                  <span className="member-name">{member.fullName}</span>
-                  <span className="member-email">{member.email}</span>
-                </div>
-                <div className="member-actions">
-                  <select
-                    value={member.role}
-                    onChange={e => updateMemberRole(member.userId, e.target.value as ProjectRole)}
-                    disabled={
-                      member.userId === currentUserId ||
-                      !canManageMembers(getUserRole(activeProject, currentUserId))
-                    }
-                    className="role-select"
-                  >
-                    {Object.entries(ROLE_LABELS).map(([role, label]) => (
-                      <option key={role} value={role}>
-                        {label}
-                      </option>
-                    ))}
-                  </select>
-                  {member.userId !== currentUserId &&
-                    canManageMembers(getUserRole(activeProject, currentUserId)) && (
-                      <button
-                        onClick={() => removeMember(member.userId)}
-                        className="remove-member-btn"
-                      >
-                        Remove
-                      </button>
-                    )}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="setting-section">
-          <h3>Add Friends</h3>
-          {loading ? (
-            <div className="loading-state">
-              <div className="spinner"></div>
-              <p>Loading friends...</p>
+        {canManageMembers(userRole) && (
+          <>
+            <div className="setting-section">
+              <h3>Project Name</h3>
+              <input
+                type="text"
+                value={projectName}
+                onChange={e => setProjectName(e.target.value)}
+                placeholder="Enter project name"
+                className="project-name-input"
+              />
             </div>
-          ) : availableFriends.length === 0 ? (
-            <p className="no-friends">No available friends to add</p>
-          ) : (
-            <>
-              <div className="friends-search">
-                <input
-                  type="text"
-                  placeholder="Search friends by name or email..."
-                  value={friendSearch}
-                  onChange={e => setFriendSearch(e.target.value)}
-                  className="search-input"
-                />
-                <div className="search-stats">
-                  {filteredFriends.length} of {availableFriends.length} friends
-                </div>
-              </div>
 
-              {filteredFriends.length === 0 ? (
-                <p className="no-results">No friends match your search</p>
-              ) : (
-                <div className="friends-list">
-                  {filteredFriends.map(friend => (
-                    <div key={friend.id} className="friend-item">
-                      <label className="friend-checkbox">
-                        <input
-                          type="checkbox"
-                          checked={selectedFriends.includes(friend.id)}
-                          onChange={() => toggleFriend(friend.id)}
-                        />
-                        <div className="friend-info">
-                          <span className="friend-name">{friend.fullName}</span>
-                          <span className="friend-email">{friend.email}</span>
-                        </div>
-                      </label>
-                      {selectedFriends.includes(friend.id) && (
-                        <select
-                          value={selectedRoles[friend.id] || 'viewer'}
-                          onChange={e => updateFriendRole(friend.id, e.target.value as ProjectRole)}
-                          className="role-select"
-                        >
-                          {Object.entries(ROLE_LABELS).map(([role, label]) => (
-                            <option key={role} value={role}>
-                              {label}
-                            </option>
-                          ))}
-                        </select>
-                      )}
+            <div className="setting-section">
+              <h3>Current Members</h3>
+              <div className="members-list">
+                {currentMembers.map(member => (
+                  <div key={member.userId} className="member-item">
+                    <div className="member-info">
+                      <span className="member-name">{member.fullName}</span>
+                      <span className="member-email">{member.email}</span>
                     </div>
-                  ))}
-                </div>
-              )}
-
-              {selectedFriends.length > 0 && (
-                <div className="selected-summary">
-                  <h4>Selected Friends ({selectedFriends.length})</h4>
-                  <div className="selected-friends">
-                    {selectedFriends.map(friendId => {
-                      const friend = availableFriends.find(f => f.id === friendId);
-                      const role = selectedRoles[friendId] || 'viewer';
-                      return friend ? (
-                        <div key={friendId} className="selected-friend">
-                          <span className="friend-name">{friend.fullName}</span>
-                          <span
-                            className="role-badge"
-                            style={{ backgroundColor: ROLE_COLORS[role] }}
-                          >
-                            {ROLE_LABELS[role]}
-                          </span>
+                    <div className="member-actions">
+                      <select
+                        value={member.role}
+                        onChange={e => updateMemberRole(member.userId, e.target.value as ProjectRole)}
+                        disabled={
+                          member.userId === currentUserId ||
+                          !canManageMembers(getUserRole(activeProject, currentUserId))
+                        }
+                        className="role-select"
+                      >
+                        {Object.entries(ROLE_LABELS).map(([role, label]) => (
+                          <option key={role} value={role}>
+                            {label}
+                          </option>
+                        ))}
+                      </select>
+                      {member.userId !== currentUserId &&
+                        member.role !== 'owner' &&
+                        canManageMembers(getUserRole(activeProject, currentUserId)) && (
                           <button
-                            onClick={() => toggleFriend(friendId)}
-                            className="remove-selected-btn"
+                            onClick={() => removeMember(member.userId)}
+                            className="remove-member-btn"
                           >
-                            ×
+                            Remove
                           </button>
-                        </div>
-                      ) : null;
-                    })}
+                        )}
+                    </div>
                   </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="setting-section">
+              <h3>Add Friends</h3>
+              {loading ? (
+                <div className="loading-state">
+                  <div className="spinner"></div>
+                  <p>Loading friends...</p>
                 </div>
+              ) : availableFriends.length === 0 ? (
+                <p className="no-friends">No available friends to add</p>
+              ) : (
+                <>
+                  <div className="friends-search">
+                    <input
+                      type="text"
+                      placeholder="Search friends by name or email..."
+                      value={friendSearch}
+                      onChange={e => setFriendSearch(e.target.value)}
+                      className="search-input"
+                    />
+                    <div className="search-stats">
+                      {filteredFriends.length} of {availableFriends.length} friends
+                    </div>
+                  </div>
+
+                  {filteredFriends.length === 0 ? (
+                    <p className="no-results">No friends match your search</p>
+                  ) : (
+                    <div className="friends-list">
+                      {filteredFriends.map(friend => (
+                        <div key={friend.id} className="friend-item">
+                          <label className="friend-checkbox">
+                            <input
+                              type="checkbox"
+                              checked={selectedFriends.includes(friend.id)}
+                              onChange={() => toggleFriend(friend.id)}
+                            />
+                            <div className="friend-info">
+                              <span className="friend-name">{friend.fullName}</span>
+                              <span className="friend-email">{friend.email}</span>
+                            </div>
+                          </label>
+                          {selectedFriends.includes(friend.id) && (
+                            <select
+                              value={selectedRoles[friend.id] || 'viewer'}
+                              onChange={e => updateFriendRole(friend.id, e.target.value as ProjectRole)}
+                              className="role-select"
+                            >
+                              {Object.entries(ROLE_LABELS).map(([role, label]) => (
+                                <option key={role} value={role}>
+                                  {label}
+                                </option>
+                              ))}
+                            </select>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {selectedFriends.length > 0 && (
+                    <div className="selected-summary">
+                      <h4>Selected Friends ({selectedFriends.length})</h4>
+                      <div className="selected-friends">
+                        {selectedFriends.map(friendId => {
+                          const friend = availableFriends.find(f => f.id === friendId);
+                          const role = selectedRoles[friendId] || 'viewer';
+                          return friend ? (
+                            <div key={friendId} className="selected-friend">
+                              <span className="friend-name">{friend.fullName}</span>
+                              <span
+                                className="role-badge"
+                                style={{ backgroundColor: ROLE_COLORS[role] }}
+                              >
+                                {ROLE_LABELS[role]}
+                              </span>
+                              <button
+                                onClick={() => toggleFriend(friendId)}
+                                className="remove-selected-btn"
+                              >
+                                ×
+                              </button>
+                            </div>
+                          ) : null;
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
-            </>
-          )}
-        </div>
+            </div>
+          </>
+        )}
+
+                 {!canManageMembers(userRole) && (
+           <>
+             <div className="setting-section">
+               <h3>Project Information</h3>
+               <div className="project-info-readonly">
+                 <p><strong>Project Name:</strong> {activeProject.name}</p>
+                 <p><strong>Your Role:</strong> 
+                   <span 
+                     className="role-badge" 
+                     style={{ backgroundColor: ROLE_COLORS[userRole || 'viewer'] }}
+                   >
+                     {ROLE_LABELS[userRole || 'viewer']}
+                   </span>
+                 </p>
+                 <p><strong>Role Description:</strong> {ROLE_DESCRIPTIONS[userRole || 'viewer']}</p>
+               </div>
+             </div>
+
+             <div className="setting-section">
+               <h3>Project Members</h3>
+               {loading ? (
+                 <div className="loading-state">
+                   <div className="spinner"></div>
+                   <p>Loading members...</p>
+                 </div>
+               ) : (
+                 <div className="members-list">
+                   {currentMembers.map(member => (
+                     <div key={member.userId} className="member-item">
+                       <div className="member-info">
+                         <span className="member-name">
+                           {member.userId === currentUserId ? 'You' : member.fullName}
+                         </span>
+                         <span className="member-email">
+                           {member.userId === currentUserId ? 'Your email' : member.email}
+                         </span>
+                       </div>
+                       <div className="member-actions">
+                         <span 
+                           className="role-badge" 
+                           style={{ backgroundColor: ROLE_COLORS[member.role] }}
+                         >
+                           {ROLE_LABELS[member.role]}
+                         </span>
+                       </div>
+                     </div>
+                   ))}
+                 </div>
+               )}
+             </div>
+           </>
+         )}
+
+        {canLeaveProject(userRole) && (
+          <div className="setting-section">
+            <h3>Leave Project</h3>
+            <div className="leave-project-zone">
+              <p>You will lose access to this project and all its tasks.</p>
+              <button className="leave-project-btn" onClick={handleLeaveProject} disabled={leaving}>
+                {leaving ? (
+                  <>
+                    <div className="spinner"></div>
+                    Leaving...
+                  </>
+                ) : (
+                  'Leave Project'
+                )}
+              </button>
+            </div>
+          </div>
+        )}
 
         {canDeleteProject(userRole) && (
           <div className="setting-section">
@@ -457,22 +582,24 @@ const ProjectSettings: React.FC<ProjectSettingsProps> = () => {
 
         <div className="page-footer">
           <button className="cancel-btn" onClick={() => (window.location.href = '/account')}>
-            Cancel
+            {canManageMembers(userRole) ? 'Cancel' : 'Back'}
           </button>
-          <button
-            className="save-btn"
-            onClick={handleSave}
-            disabled={saving || !projectName.trim()}
-          >
-            {saving ? (
-              <>
-                <div className="spinner"></div>
-                Saving...
-              </>
-            ) : (
-              'Save Changes'
-            )}
-          </button>
+          {canManageMembers(userRole) && (
+            <button
+              className="save-btn"
+              onClick={handleSave}
+              disabled={saving || !projectName.trim()}
+            >
+              {saving ? (
+                <>
+                  <div className="spinner"></div>
+                  Saving...
+                </>
+              ) : (
+                'Save Changes'
+              )}
+            </button>
+          )}
         </div>
       </div>
     </div>

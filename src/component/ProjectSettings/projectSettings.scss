@@ -110,10 +110,37 @@
         }
       }
 
-      .no-friends {
-        color: #aaa;
-        font-style: italic;
-      }
+             .no-friends {
+         color: #aaa;
+         font-style: italic;
+       }
+
+       .project-info-readonly {
+         background: rgba(255, 255, 255, 0.05);
+         border: 1px solid rgba(255, 255, 255, 0.1);
+         border-radius: 8px;
+         padding: 16px;
+
+         p {
+           margin: 8px 0;
+           color: #fff;
+
+           strong {
+             color: #f0f0f0;
+             margin-right: 8px;
+           }
+
+           .role-badge {
+             display: inline-block;
+             padding: 4px 8px;
+             border-radius: 12px;
+             font-size: 0.8rem;
+             font-weight: 600;
+             color: white;
+             margin-left: 8px;
+           }
+         }
+       }
 
       .members-list {
         max-height: 200px;
@@ -343,6 +370,52 @@
                 color: #ef4444;
               }
             }
+          }
+        }
+      }
+
+      .leave-project-zone {
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        border-radius: 8px;
+        padding: 16px;
+
+        p {
+          color: #fbbf24;
+          margin-bottom: 16px;
+          font-size: 0.9rem;
+        }
+
+        .leave-project-btn {
+          background: #f59e0b;
+          color: white;
+          border: none;
+          border-radius: 8px;
+          padding: 12px 24px;
+          font-size: 1rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: background-color 0.2s;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+
+          &:hover:not(:disabled) {
+            background: #d97706;
+          }
+
+          &:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+          }
+
+          .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid #fff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
           }
         }
       }

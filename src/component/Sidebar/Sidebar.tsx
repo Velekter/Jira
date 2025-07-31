@@ -108,11 +108,13 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, logoutUser }) 
               {isOpen && <span className="nav-text">Friends</span>}
             </Link>
           </li>
-          {canAccessSettings && (
+          {activeProject && (
             <li className={isActiveRoute('/account/settings') ? 'active' : ''}>
               <Link to="/account/settings">
                 <span className="nav-icon">⚙️</span>
-                {isOpen && <span className="nav-text">Settings</span>}
+                {isOpen && <span className="nav-text">
+                  {canAccessSettings ? 'Settings' : 'Project Info'}
+                </span>}
               </Link>
             </li>
           )}
