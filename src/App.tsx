@@ -8,7 +8,7 @@ import AccountPage from './pages/AccountPage.tsx';
 import { checkAuthLoader } from './lib/auth.ts';
 import UserProfilePage from './pages/UserProfilePage.tsx';
 import FriendPage from './pages/FriendPage.tsx';
-import ProjectSettingsPage from './pages/ProjectSettingsPage.tsx';
+import ProtectedProjectSettings from './component/ProtectedProjectSettings/ProtectedProjectSettings.tsx';
 
 export const router = createBrowserRouter([
   {
@@ -40,7 +40,7 @@ export const router = createBrowserRouter([
   },
   {
     path: '/account/settings',
-    element: <ProjectSettingsPage />,
+    element: <ProtectedProjectSettings />,
     loader: checkAuthLoader,
   },
   {

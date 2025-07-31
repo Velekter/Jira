@@ -6,6 +6,7 @@ import './header.scss';
 import AddBoardModal from '../AddBoardModal/AddBoardModal';
 import TaskModal from '../TaskModal/TaskModal';
 import { useProjectContext } from '../../context/ProjectContext';
+import { getUserRole, canManageMembers, canEditProject } from '../../lib/roles';
 
 interface HeaderProps {
   isSidebarOpen: boolean;
@@ -19,26 +20,35 @@ const Header: React.FC<HeaderProps> = ({ isSidebarOpen, onCreateBoard, mode, set
   const navigate = useNavigate();
   const modalRef = useRef<ModalRef>(null);
   const modalTaskRef = useRef<TaskModalRef>(null);
+  const userId = localStorage.getItem('userId') ?? '';
+  const userRole = activeProject ? getUserRole(activeProject, userId) : null;
 
   const handleClick = () => {
     if (mode === 'upcoming') {
+      if (!canEditProject(userRole)) {
+        alert('Error: You do not have permission to create tasks. You need Editor or higher role.');
+        return;
+      }
       modalTaskRef.current?.open();
     } else {
+      if (!canManageMembers(userRole)) {
+        alert('Error: You do not have permission to create boards. You need Admin or higher role.');
+        return;
+      }
       modalRef.current?.open();
     }
   };
 
   return (
-                <header className={`dashboard-header ${isSidebarOpen ? 'sidebar-open' : ''}`}>
-        <div className="header-top">
-          <h1>Kanban Dashboard</h1>
-          <Link
-            className="project-settings-btn"
-            to={'/account/settings'} 
-          >
+    <header className={`dashboard-header ${isSidebarOpen ? 'sidebar-open' : ''}`}>
+      <div className="header-top">
+        <h1>Kanban Dashboard</h1>
+        {canManageMembers(userRole) && (
+          <Link className="project-settings-btn" to={'/account/settings'}>
             ⋯
           </Link>
-        </div>
+        )}
+      </div>
       <div className="kanban-header__buttons">
         <button className={mode === 'upcoming' ? 'active' : ''} onClick={() => setMode('upcoming')}>
           Upcoming Tasks
@@ -61,6 +71,7 @@ const Header: React.FC<HeaderProps> = ({ isSidebarOpen, onCreateBoard, mode, set
           done: 'Done',
         }}
         mode={mode}
+        readOnly={!canEditProject(userRole)}
       />
     </header>
   );

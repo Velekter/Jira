@@ -34,8 +34,8 @@ export default function Login() {
 
   return (
     <div className="login-page" data-testid="login-page">
+      <Back page={'/'} />
       <div className="container">
-      <Back page={'/'}/>
         <h1 className="title">Sign In To Your Account.</h1>
         <p className="description">Enter your details to continue</p>
 

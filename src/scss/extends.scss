@@ -1,2 +1,78 @@
+@use "sass:map";
 @use './variables.scss' as *;
+@use './mixins.scss' as *;
+
+%button-reset {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+  font: inherit;
+}
+
+%input-reset {
+  background: none;
+  border: none;
+  outline: none;
+  font: inherit;
+}
+
+%card-shadow {
+  box-shadow: map.get($shadows, "lg");
+}
+
+%glass-effect {
+  @include glassmorphism;
+}
+
+%gradient-text {
+  @include text-gradient;
+}
+
+%loading-state {
+  @include loading-spinner;
+}
+
+%scrollable {
+  @include scrollbar;
+}
+
+%hover-lift {
+  transition: map.get($transitions, "normal");
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: map.get($shadows, "xl");
+  }
+}
+
+%focus-ring {
+  &:focus {
+    outline: 2px solid map.get($colors, "primary");
+    outline-offset: 2px;
+  }
+}
+
+%truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+%center-absolute {
+  @include absolute-center;
+}
+
+%flex-center {
+  @include flex-center;
+}
+
+%flex-between {
+  @include flex-between;
+}
+
+%flex-column {
+  @include flex-column;
+}
 

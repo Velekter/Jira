@@ -7,6 +7,7 @@
   user-select: none;
   text-decoration: none;
   transition: background-color 0.3s ease;
+  padding: 12px 8px;
 
   &:hover {
     background-color: #1f2937;
@@ -19,7 +20,7 @@
     background-color: #4f46e5;
     color: white;
     font-weight: 700;
-    font-size: 20px;
+    font-size: 22px;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -29,7 +30,6 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      
     }
 
     .placeholder {
@@ -51,11 +51,12 @@
     justify-content: center;
     background-color: #1e293b;
     border-top: 0;
+    padding: 0px 0px;
 
     .avatar {
       width: 44px;
       height: 44px;
-      font-size: 18px;
+      font-size: 20px;
       border-radius: 50%;
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
     }

@@ -135,7 +135,6 @@ export default function FriendRequests() {
 
       const fromSnapAfter = await getDoc(fromRef);
       console.log('After update fromData.friends:', fromSnapAfter.data()?.friends);
-
     } catch (error) {
       console.error('Error in acceptRequest:', error);
     }
@@ -164,7 +163,7 @@ export default function FriendRequests() {
   return (
     <div className="friend-requests">
       <h2>Friend Requests</h2>
-      
+
       <div className="requests-section">
         <h3>Incoming Requests</h3>
         {incoming.length === 0 ? (

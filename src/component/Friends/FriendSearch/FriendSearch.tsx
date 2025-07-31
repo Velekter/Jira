@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useMutation } from '@tanstack/react-query';
 import { collection, getDocs, query, where, doc, setDoc } from 'firebase/firestore';
-import { db, auth} from '../../../lib/firebase';
+import { db, auth } from '../../../lib/firebase';
 import './friendSearch.scss';
 
 export default function FriendSearch() {
@@ -72,7 +72,7 @@ export default function FriendSearch() {
     <div className="friend-search">
       <h2>Find Friends</h2>
       <p className="search-description">Search for friends by their email address</p>
-      
+
       <div className="search-bar">
         <input
           type="email"
@@ -96,16 +96,14 @@ export default function FriendSearch() {
       {foundUser && (
         <div className="result">
           <div className="user-info">
-            <div className="user-avatar">
-              {foundUser.fullName?.charAt(0)?.toUpperCase() || '?'}
-            </div>
+            <div className="user-avatar">{foundUser.fullName?.charAt(0)?.toUpperCase() || '?'}</div>
             <div className="user-details">
               <p className="user-name">{foundUser.fullName}</p>
               <p className="user-email">{foundUser.email}</p>
             </div>
           </div>
-          <button 
-            onClick={() => sendRequest(foundUser.id)} 
+          <button
+            onClick={() => sendRequest(foundUser.id)}
             disabled={sending}
             className="send-request-btn"
           >

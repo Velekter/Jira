@@ -1,3 +1,10 @@
+@use './scss/variables.scss' as *;
+@use './scss/mixins.scss' as *;
+@use './scss/extends.scss' as *;
+@use './scss/animations.scss' as *;
+@use './scss/utilities.scss' as *;
+@use './scss/responsive.scss' as *;
+
 * {
   margin: 0;
   padding: 0;
@@ -25,6 +32,26 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color 0.3s ease, color 0.3s ease;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+
+#root {
+  max-width: 1920px;
+  margin: 0 auto;
+  width: 100%;
+  min-height: 100vh;
+  position: relative;
+  background: #fff;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+}
+
+
+@media (min-width: 1921px) {
+  #root {
+    box-shadow: 0 0 30px rgba(0, 0, 0, 0.15);
+  }
 }
 
 a {

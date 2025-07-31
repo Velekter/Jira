@@ -1,3 +1,7 @@
+@use '../../scss/variables.scss' as *;
+@use '../../scss/mixins.scss' as *;
+@use '../../scss/media_breakpoints.scss' as *;
+
 .login-page {
   height: 100vh;
   margin: 0;
@@ -6,6 +10,10 @@
   justify-content: center;
   align-items: center;
   font-family: 'Plus Jakarta Sans';
+
+  @include mobile {
+    padding: 20px;
+  }
 
   .container {
     display: flex;
@@ -18,11 +26,32 @@
     border-radius: 20px;
     position: relative;
 
+    @include tablet {
+      max-width: 500px;
+      padding: 25px;
+    }
+
+    @include mobile {
+      max-width: 100%;
+      padding: 20px;
+      width: 100%;
+    }
+
     .title {
       font-size: 36px;
       line-height: 44px;
       font-weight: 800;
       color: #1e293b;
+
+      @include tablet {
+        font-size: 28px;
+        line-height: 36px;
+      }
+
+      @include mobile {
+        font-size: 24px;
+        line-height: 32px;
+      }
     }
 
     .description {

@@ -1,3 +1,7 @@
+@use '../../scss/variables.scss' as *;
+@use '../../scss/mixins.scss' as *;
+@use '../../scss/media_breakpoints.scss' as *;
+
 .modal-content {
   background-color: #1e1e2f;
   border: none;
@@ -13,10 +17,25 @@
   color: white;
   font-family: 'Plus Jakarta Sans', sans-serif;
 
+  @include tablet {
+    max-width: 450px;
+    padding: 1.5rem;
+  }
+
+  @include mobile {
+    max-width: 95%;
+    padding: 1rem;
+    margin: 10px;
+  }
+
   h2 {
     font-size: 1.5rem;
     margin-bottom: 0.5rem;
     color: #fff;
+
+    @include mobile {
+      font-size: 1.2rem;
+    }
   }
 
   input,
@@ -39,6 +58,19 @@
     &::placeholder {
       color: #aaa;
     }
+
+    &.readonly {
+      background: #1a1a2e;
+      border-color: #333;
+      color: #ccc;
+      cursor: not-allowed;
+      opacity: 0.8;
+
+      &:focus {
+        border-color: #333;
+        background: #1a1a2e;
+      }
+    }
   }
 
   textarea {
@@ -51,6 +83,11 @@
     justify-content: space-between; 
     margin-top: 1rem;
     align-items: center;
+
+    @include mobile {
+      flex-direction: column;
+      gap: 10px;
+    }
 
     .delete {
       background-color: crimson;

@@ -1,8 +1,17 @@
+@use '../../scss/variables.scss' as *;
+@use '../../scss/mixins.scss' as *;
+@use '../../scss/media_breakpoints.scss' as *;
+
 .add-board-form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
   padding: 1.5rem;
+
+  @include mobile {
+    gap: 0.75rem;
+    padding: 1rem;
+  }
 
   h2 {
     font-size: 1.5rem;

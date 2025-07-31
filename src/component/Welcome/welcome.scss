@@ -9,6 +9,10 @@
   align-items: center;
   font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
 
+  @include mobile {
+    padding: 20px;
+  }
+
   .container {
     background-color: #fff;
     padding: 40px;

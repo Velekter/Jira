@@ -25,9 +25,7 @@ const FriendsProfile: React.FC<FriendsProfileProps> = ({ friend, onRemoveFriend 
 
   return (
     <div className="friends-profile">
-      <div className="friend-avatar-large">
-        {friend.fullName?.charAt(0)?.toUpperCase() || '?'}
-      </div>
+      <div className="friend-avatar-large">{friend.fullName?.charAt(0)?.toUpperCase() || '?'}</div>
       <div className="friend-info">
         <h4>{friend.fullName}</h4>
         <p className="friend-email">{friend.email}</p>
@@ -41,4 +39,4 @@ const FriendsProfile: React.FC<FriendsProfileProps> = ({ friend, onRemoveFriend 
   );
 };
 
-export default FriendsProfile; 
+export default FriendsProfile;

@@ -1,11 +1,51 @@
+@use '../../scss/variables.scss' as *;
+@use '../../scss/mixins.scss' as *;
+@use '../../scss/media_breakpoints.scss' as *;
+
 .account-page {
   display: flex;
   height: 100vh;
   background: linear-gradient(to right, #f7f9fc, #edf1f7);
   transition: margin-left 0.3s ease;
+  max-width: 1920px;
+  margin: 0 auto;
 
   &.sidebar-open {
     margin-left: 216px;
+  }
+
+  @include tablet {
+    &.sidebar-open {
+      margin-left: 180px;
+    }
+  }
+
+  @include mobile {
+    &.sidebar-open {
+      margin-left: 160px;
+    }
+  }
+
+  @media (min-width: 1024px) and (max-width: 1919px) {
+    margin-left: 216px;
+
+    &.sidebar-open {
+      margin-left: 216px;
+    }
+  }
+
+  @media (min-width: 1024px) and (max-width: 1919px) {
+    &.sidebar-collapsed {
+      margin-left: 60px;
+    }
+  }
+
+  @media (min-width: 1920px) {
+    margin-left: 60px;
+
+    &.sidebar-open {
+      margin-left: 216px;
+    }
   }
 }
 
@@ -13,6 +53,30 @@
   flex: 1;
   padding: 40px 20px 0px 90px;
   overflow-y: auto;
+
+  @include tablet {
+    padding: 30px 15px 0px 60px;
+  }
+
+  @include mobile {
+    padding: 20px 10px 0px 20px;
+  }
+
+  @media (min-width: 1024px) and (max-width: 1919px) {
+    padding: 40px 20px 0px 40px;
+
+    .sidebar-collapsed & {
+      padding: 40px 20px 0px 40px;
+    }
+  }
+
+  @media (min-width: 1920px) {
+    padding: 40px 20px 0px 20px;
+
+    .sidebar-collapsed & {
+      padding: 40px 20px 0px 20px;
+    }
+  }
 }
 
 p {
@@ -24,21 +88,67 @@ p {
 
 .kanban {
   display: flex;
-  gap: 2rem;
+  gap: 1.5rem;
   height: 100%;
   min-height: 500px;
   padding: 1rem 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  &::-webkit-scrollbar {
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    transition: background 0.3s ease;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.3);
+    }
+  }
+
+  @include tablet {
+    gap: 1rem;
+    min-height: 400px;
+    padding: 0.75rem 0;
+  }
+
+  @include mobile {
+    flex-direction: column;
+    gap: 0.5rem;
+    min-height: auto;
+    padding: 0.5rem 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
 }
 
 .kanban-task {
   background-color: #fefefe;
   border: 1px solid #e0e0e0;
   border-radius: 10px;
-  padding: 0.75rem 1rem;
-  margin-bottom: 1rem;
+  padding: 0.6rem 0.8rem;
+  margin-bottom: 0.8rem;
   cursor: grab;
   transition: box-shadow 0.2s ease;
   user-select: none;
+
+  @include tablet {
+    padding: 0.5rem 0.7rem;
+    margin-bottom: 0.6rem;
+  }
+
+  @include mobile {
+    padding: 0.4rem 0.6rem;
+    margin-bottom: 0.5rem;
+  }
 
   &:active {
     cursor: grabbing;
@@ -110,5 +220,31 @@ p {
   &.high {
     background-color: #f8d7da;
     color: #721c24;
+  }
+}
+
+.kanban-column-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding-right: 4px;
+
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.05);
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 3px;
+    transition: background 0.3s ease;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.3);
+    }
   }
 }

@@ -1,13 +1,33 @@
+@use '../../scss/variables.scss' as *;
+@use '../../scss/mixins.scss' as *;
+@use '../../scss/media_breakpoints.scss' as *;
+
 .kanban-column {
   background: #fff;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  flex: 1;
+  flex: 0 0 280px;
   padding: 1rem;
   display: flex;
   flex-direction: column;
   max-height: 100%;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  min-height: 400px;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+
+  @include tablet {
+    flex: 0 0 240px;
+    padding: 0.75rem;
+    min-height: 350px;
+  }
+
+  @include mobile {
+    flex: 1;
+    padding: 0.5rem;
+    min-height: 200px;
+    margin-bottom: 10px;
+  }
 
   &:active {
     cursor: grabbing;
@@ -37,7 +57,8 @@
   }
 
   @keyframes pulse {
-    0%, 100% {
+    0%,
+    100% {
       opacity: 1;
     }
     50% {
@@ -46,8 +67,8 @@
   }
 
   h3 {
-    font-size: 1.2rem;
-    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    margin-bottom: 0.8rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -55,6 +76,17 @@
     position: relative;
     cursor: grab;
     user-select: none;
+    flex-shrink: 0;
+
+    @include tablet {
+      font-size: 1rem;
+      margin-bottom: 0.6rem;
+    }
+
+    @include mobile {
+      font-size: 0.9rem;
+      margin-bottom: 0.5rem;
+    }
 
     &:active {
       cursor: grabbing;
@@ -63,59 +95,59 @@
     &:hover .drag-handle {
       opacity: 1;
     }
+  }
 
-    .kanban-column-buttons {
+  .kanban-column-buttons {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+
+    .drag-handle {
+      color: #ccc;
+      font-size: 12px;
+      cursor: grab;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      user-select: none;
+
+      &:active {
+        cursor: grabbing;
+      }
+    }
+
+    button {
+      width: 30px;
+      height: 30px;
+      font-size: 20px;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+      border-radius: 6px;
       display: flex;
-      gap: 0.5rem;
-      align-items: center;
+      justify-content: center;
+      user-select: none;
+      position: relative;
+      top: 2px;
+      color: #333;
+      background-color: transparent;
+      transition: background-color 0.2s ease;
 
-      .drag-handle {
-        color: #ccc;
-        font-size: 12px;
-        cursor: grab;
-        opacity: 0;
-        transition: opacity 0.2s ease;
-        user-select: none;
-
-        &:active {
-          cursor: grabbing;
-        }
-      }
-
-      button {
-        width: 30px;
-        height: 30px;
-        font-size: 20px;
-        font-weight: bold;
-        border: none;
-        cursor: pointer;
-        border-radius: 6px;
-        display: flex;
-        justify-content: center;
-        user-select: none;
-        position: relative;
-        top: 2px;
+      &:hover {
         color: #333;
-        background-color: transparent;
-        transition: background-color 0.2s ease;
-
-        &:hover {
-          color: #333;
-        }
       }
+    }
 
-      .add-btn {
-        &:hover {
-          background-color: #34a853;
-        }
+    .add-btn {
+      &:hover {
+        background-color: #34a853;
       }
+    }
 
-      .delete-btn {
-        color: #333;
+    .delete-btn {
+      color: #333;
 
-        &:hover {
-          background-color: #ff4d4f;
-        }
+      &:hover {
+        background-color: #ff4d4f;
       }
     }
   }

@@ -17,10 +17,7 @@ const UserAvatar: React.FC<UserAvatarProps> = ({ collapsed = false }) => {
   if (isError) return <div className="user-avatar error">Error</div>;
 
   return (
-    <Link
-      to="/account/profile"
-      className={`user-avatar${collapsed ? ' collapsed' : ''}`}
-    >
+    <Link to="/account/profile" className={`user-avatar${collapsed ? ' collapsed' : ''}`}>
       <div className="avatar">
         {avatar ? (
           <img src={avatar} alt="Avatar" />

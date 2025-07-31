@@ -1,6 +1,174 @@
+@use "sass:map";
+@use "sass:color";
+@use "./variables.scss" as *;
+
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+@mixin absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+@mixin glassmorphism {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+@mixin gradient($direction: 135deg, $color1: map.get($colors, "primary"), $color2: map.get($colors, "primary-dark")) {
+  background: linear-gradient($direction, $color1 0%, $color2 100%);
+}
+
+@mixin button-base {
+  padding: map.get($spacing, "sm") map.get($spacing, "lg");
+  border-radius: map.get($border-radius, "lg");
+  font-weight: 500;
+  cursor: pointer;
+  transition: all map.get($transitions, "normal");
+  border: none;
+  outline: none;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: map.get($spacing, "xs");
+}
+
+@mixin button-variant($bg-color, $text-color: white, $hover-bg: null) {
+  @include button-base;
+  background-color: $bg-color;
+  color: $text-color;
+
+  &:hover {
+    background-color: $hover-bg or color.adjust($bg-color, $lightness: -10%);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+@mixin input-base {
+  padding: map.get($spacing, "sm") map.get($spacing, "md");
+  border-radius: map.get($border-radius, "lg");
+  border: 1px solid map.get($colors, "gray");
+  background-color: white;
+  color: map.get($colors, "dark");
+  font-size: map.get($font-sizes, "base");
+  transition: all map.get($transitions, "normal");
+  outline: none;
+
+  &:focus {
+    border-color: map.get($colors, "primary");
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+  }
+
+  &::placeholder {
+    color: map.get($colors, "gray");
+  }
+}
+
+@mixin card-base {
+  background: white;
+  border-radius: map.get($border-radius, "lg");
+  box-shadow: map.get($shadows, "md");
+  padding: map.get($spacing, "lg");
+}
+
+@mixin text-gradient {
+  background: linear-gradient(135deg, map.get($colors, "primary"), map.get($colors, "primary-dark"));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+@mixin loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(96, 165, 250, 0.2);
+  border-top: 3px solid map.get($colors, "primary");
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@mixin scrollbar {
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+}
+
+@mixin fade-in {
+  animation: fadeIn map.get($transitions, "normal") ease-out;
+}
+
+@mixin slide-in($direction: up) {
+  @if $direction == up {
+    animation: slideInUp map.get($transitions, "normal") ease-out;
+  } @else if $direction == down {
+    animation: slideInDown map.get($transitions, "normal") ease-out;
+  } @else if $direction == left {
+    animation: slideInLeft map.get($transitions, "normal") ease-out;
+  } @else if $direction == right {
+    animation: slideInRight map.get($transitions, "normal") ease-out;
+  }
+}
+
+@mixin pulse {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@mixin responsive($breakpoint) {
+  @if $breakpoint == mobile {
+    @media (max-width: map.get($breakpoints, "sm")) {
+      @content;
+    }
+  } @else if $breakpoint == tablet {
+    @media (max-width: map.get($breakpoints, "md")) {
+      @content;
+    }
+  } @else if $breakpoint == laptop {
+    @media (max-width: map.get($breakpoints, "xl")) {
+      @content;
+    }
+  } @else if $breakpoint == desktop {
+    @media (max-width: map.get($breakpoints, "xxl")) {
+      @content;
+    }
+  }
+}
+
 @mixin my-mixin($color, $height) {
   color: $color;
-  height: $height ;
-
-  @extend %extend-example;
+  height: $height;
 }

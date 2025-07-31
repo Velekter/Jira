@@ -24,7 +24,10 @@ const COLORS = [
 ];
 
 const AddBoardModal = forwardRef<ModalRef, AddBoardModalProps>(
-  ({ onCreateBoard, onUpdateBoard, initialName = '', initialColor = COLORS[0], isEdit = false }, ref) => {
+  (
+    { onCreateBoard, onUpdateBoard, initialName = '', initialColor = COLORS[0], isEdit = false },
+    ref
+  ) => {
     const [boardName, setBoardName] = useState(initialName);
     const [selectedColor, setSelectedColor] = useState(initialColor);
     const modalRef = React.useRef<ModalRef>(null);

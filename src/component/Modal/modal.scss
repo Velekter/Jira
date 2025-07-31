@@ -1,3 +1,7 @@
+@use '../../scss/variables.scss' as *;
+@use '../../scss/mixins.scss' as *;
+@use '../../scss/media_breakpoints.scss' as *;
+
 .modal-backdrop {
   position: fixed;
   inset: 0;
@@ -8,6 +12,10 @@
   justify-content: center;
   align-items: center;
   padding: 1rem;
+
+  @include mobile {
+    padding: 0.5rem;
+  }
 }
 
 .modal-content {
@@ -21,6 +29,15 @@
   overflow: hidden;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   animation: modalSlideIn 0.3s ease-out;
+
+  @include tablet {
+    max-width: 350px;
+  }
+
+  @include mobile {
+    max-width: 95%;
+    max-height: 95vh;
+  }
 }
 
 @keyframes modalSlideIn {

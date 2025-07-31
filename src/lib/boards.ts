@@ -1,4 +1,13 @@
-import { collection, addDoc, getDocs, query, deleteDoc, doc, updateDoc, writeBatch } from 'firebase/firestore';
+import {
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  deleteDoc,
+  doc,
+  updateDoc,
+  writeBatch,
+} from 'firebase/firestore';
 import { db } from './firebase';
 
 interface Board {
@@ -9,20 +18,15 @@ interface Board {
   order?: number;
 }
 
-export const addBoard = async (
-  projectId: string,
-  name: string,
-  color: string
-): Promise<string> => {
-  
+export const addBoard = async (projectId: string, name: string, color: string): Promise<string> => {
   const boardsRef = collection(db, 'projects', projectId, 'boards');
-  
-  
+
   const existingBoards = await getBoards(projectId);
-  const maxOrder = existingBoards.length > 0 ? Math.max(...existingBoards.map(b => b.order || 0)) : -1;
-  
+  const maxOrder =
+    existingBoards.length > 0 ? Math.max(...existingBoards.map(b => b.order || 0)) : -1;
+
   console.log('Adding new board with order:', maxOrder + 1, 'for project:', projectId);
-  
+
   const docRef = await addDoc(boardsRef, {
     name,
     color,
@@ -38,7 +42,6 @@ export async function getBoards(projectId: string): Promise<Board[]> {
     return [];
   }
 
-  
   const boardsRef = collection(db, 'projects', projectId, 'boards');
 
   const q = query(boardsRef);
@@ -46,7 +49,6 @@ export async function getBoards(projectId: string): Promise<Board[]> {
 
   const boards = snapshot.docs.map(doc => ({ id: doc.id, ...(doc.data() as Omit<Board, 'id'>) }));
 
-  
   boards.sort((a, b) => (a.order || 0) - (b.order || 0));
 
   console.log('Fetched boards for project:', projectId, boards);
@@ -55,31 +57,25 @@ export async function getBoards(projectId: string): Promise<Board[]> {
 }
 
 export async function deleteBoard(projectId: string, boardId: string) {
-
   const boardRef = doc(db, 'projects', projectId, 'boards', boardId);
   await deleteDoc(boardRef);
 }
 
-export async function updateBoard(
-  projectId: string,
-  boardId: string,
-  updates: Partial<Board>
-) {
-
+export async function updateBoard(projectId: string, boardId: string, updates: Partial<Board>) {
   const boardRef = doc(db, 'projects', projectId, 'boards', boardId);
   await updateDoc(boardRef, updates);
 }
 
 export async function updateBoardOrder(projectId: string, boardIds: string[]) {
   console.log('Updating board order for project:', projectId, 'with order:', boardIds);
-  
+
   const batch = writeBatch(db);
-  
+
   boardIds.forEach((boardId, index) => {
     const boardRef = doc(db, 'projects', projectId, 'boards', boardId);
     batch.update(boardRef, { order: index });
   });
-  
+
   await batch.commit();
   console.log('Board order updated successfully');
 }

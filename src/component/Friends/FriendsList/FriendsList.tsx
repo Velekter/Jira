@@ -4,7 +4,7 @@ import { db } from '../../../lib/firebase';
 import Modal from '../../Modal/Modal';
 import type { ModalRef } from '../../Modal/Modal';
 import FriendsProfile from '../FriendsProfile/FriendsProfile';
-import './friendsList.scss'
+import './friendsList.scss';
 
 interface Friend {
   id: string;
@@ -24,14 +24,14 @@ export default function FriendsList() {
 
     const userDocRef = doc(db, 'users', userId);
 
-    const unsubscribe = onSnapshot(userDocRef, async (docSnap) => {
+    const unsubscribe = onSnapshot(userDocRef, async docSnap => {
       if (docSnap.exists()) {
         const userData = docSnap.data();
         const friendsObj = userData.friends || {};
         const friendsIds = Object.keys(friendsObj);
 
         const friendsData = await Promise.all(
-          friendsIds.map(async (friendId) => {
+          friendsIds.map(async friendId => {
             const friendDoc = await getDoc(doc(db, 'users', friendId));
             if (friendDoc.exists()) {
               return { id: friendDoc.id, ...friendDoc.data() } as Friend;
@@ -62,14 +62,10 @@ export default function FriendsList() {
     if (!selectedFriend || !userId) return;
 
     try {
-  
       const userRef = doc(db, 'users', userId);
       const friendRef = doc(db, 'users', selectedFriend.id);
 
-      const [userSnap, friendSnap] = await Promise.all([
-        getDoc(userRef),
-        getDoc(friendRef)
-      ]);
+      const [userSnap, friendSnap] = await Promise.all([getDoc(userRef), getDoc(friendRef)]);
 
       if (userSnap.exists() && friendSnap.exists()) {
         const userData = userSnap.data();
@@ -83,7 +79,7 @@ export default function FriendsList() {
 
         await Promise.all([
           updateDoc(userRef, { friends: updatedUserFriends }),
-          updateDoc(friendRef, { friends: updatedFriendFriends })
+          updateDoc(friendRef, { friends: updatedFriendFriends }),
         ]);
 
         handleCloseModal();
@@ -134,10 +130,7 @@ export default function FriendsList() {
 
       <Modal ref={modalRef}>
         {selectedFriend && (
-          <FriendsProfile 
-            friend={selectedFriend} 
-            onRemoveFriend={handleRemoveFriend} 
-          />
+          <FriendsProfile friend={selectedFriend} onRemoveFriend={handleRemoveFriend} />
         )}
       </Modal>
     </div>

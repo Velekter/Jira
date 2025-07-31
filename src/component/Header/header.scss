@@ -1,14 +1,33 @@
+@use '../../scss/variables.scss' as *;
+@use '../../scss/mixins.scss' as *;
+@use '../../scss/media_breakpoints.scss' as *;
+
 .dashboard-header {
   align-self: flex-start;
   background-color: #334155;
   width: 100%;
   padding-left: 90px;
   position: relative;
-
   transition: padding-left 0.3s ease;
 
   &.sidebar-open {
     padding-left: 226px;
+  }
+
+  @include tablet {
+    padding-left: 60px;
+
+    &.sidebar-open {
+      padding-left: 200px;
+    }
+  }
+
+  @include mobile {
+    padding-left: 20px;
+
+    &.sidebar-open {
+      padding-left: 180px;
+    }
   }
 
   h1 {
@@ -16,6 +35,14 @@
     font-size: 28px;
     font-weight: 600;
     margin: 0;
+
+    @include tablet {
+      font-size: 24px;
+    }
+
+    @include mobile {
+      font-size: 20px;
+    }
   }
 
   .header-top {
@@ -24,26 +51,36 @@
     align-items: center;
     width: 100%;
     margin-bottom: 10px;
+
+    @include mobile {
+      gap: 10px;
+      align-items: flex-start;
+    }
   }
 
   .project-settings-btn {
-    background-color: #475569 ;
-    color: white ;
-    font-size: 14px ;
-    font-weight: bold ;
-    padding: 8px 16px ;
-    border-radius: 8px ;
-    cursor: pointer ;
-    transition: all 0.2s ease ;
-    border: none ;
-    text-decoration: none ;
-    display: inline-block ;
+    background-color: #475569;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    border: none;
+    text-decoration: none;
+    display: inline-block;
     margin: 10px 10px 0 0;
 
     &:hover {
-      background-color: #64748b ;
-      color: white ;
-      text-decoration: none ;
+      background-color: #64748b;
+      color: white;
+      text-decoration: none;
+    }
+
+    @include mobile {
+      font-size: 12px;
+      padding: 6px 12px;
     }
   }
 
@@ -51,6 +88,17 @@
     display: flex;
     gap: 12px;
     padding: 10px 10px 10px 0;
+
+    @include tablet {
+      gap: 8px;
+      padding: 8px 8px 8px 0;
+    }
+
+    @include mobile {
+      flex-wrap: wrap;
+      gap: 6px;
+      padding: 6px 6px 6px 0;
+    }
 
     button {
       color: #f1f5f9;
@@ -70,15 +118,31 @@
         background-color: #6366f1;
         color: white;
       }
+
+      @include tablet {
+        font-size: 12px;
+        padding: 6px 12px;
+      }
+
+      @include mobile {
+        font-size: 11px;
+        padding: 5px 10px;
+      }
     }
 
     .add-board-btn {
-      margin-left: auto;          
-      background-color: #4f46e5; 
+      margin-left: auto;
+      background-color: #4f46e5;
       color: white;
 
       &:hover {
         background-color: #4338ca;
+      }
+
+      @include mobile {
+        margin-left: 0;
+        width: 100%;
+        margin-top: 5px;
       }
     }
   }

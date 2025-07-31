@@ -107,7 +107,7 @@ const Register: React.FC = () => {
           >
             <img src={showPasswordFirst ? eyeHide : eyeShow} alt="Toggle password" />
           </button>
-        </div >
+        </div>
         <label htmlFor="password2" className="label">
           Confirm Password
         </label>

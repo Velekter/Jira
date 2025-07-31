@@ -1,3 +1,7 @@
+@use '../../scss/variables.scss' as *;
+@use '../../scss/mixins.scss' as *;
+@use '../../scss/media_breakpoints.scss' as *;
+
 .register-page {
   height: 100vh;
   margin: 0;
@@ -6,6 +10,10 @@
   justify-content: center;
   align-items: center;
   font-family: 'Plus Jakarta Sans';
+
+  @include mobile {
+    padding: 20px;
+  }
 
   .container {
     display: flex;
@@ -16,6 +24,17 @@
     padding: 20px;
     width: 90%;
     border-radius: 20px;
+
+    @include tablet {
+      max-width: 500px;
+      padding: 25px;
+    }
+
+    @include mobile {
+      max-width: 100%;
+      padding: 20px;
+      width: 100%;
+    }
 
     .title {
       font-size: 36px;

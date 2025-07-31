@@ -1,0 +1,185 @@
+@use 'sass:map';
+@use './variables.scss' as *;
+@use './media_breakpoints.scss' as *;
+
+html {
+  @include mobile {
+    font-size: 14px;
+  }
+}
+
+body {
+  @include mobile {
+    overflow-x: hidden;
+  }
+}
+
+::-webkit-scrollbar {
+  @include mobile {
+    width: 4px;
+  }
+}
+
+::-webkit-scrollbar-track {
+  @include mobile {
+    background: transparent;
+  }
+}
+
+::-webkit-scrollbar-thumb {
+  @include mobile {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 2px;
+  }
+}
+
+*:focus {
+  @include mobile {
+    outline: 2px solid map.get($colors, 'primary');
+    outline-offset: 1px;
+  }
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  @include mobile {
+    word-wrap: break-word;
+  }
+}
+
+p {
+  @include mobile {
+    word-wrap: break-word;
+  }
+}
+
+button {
+  @include mobile {
+    min-height: 44px;
+  }
+}
+
+input,
+textarea,
+select {
+  @include mobile {
+    font-size: 16px;
+  }
+}
+
+img {
+  @include mobile {
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+table {
+  @include mobile {
+    font-size: 0.9rem;
+  }
+}
+
+form {
+  @include mobile {
+    width: 100%;
+  }
+}
+
+.container {
+  @include mobile {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}
+
+.flex-container {
+  @include mobile {
+    flex-direction: column;
+  }
+}
+
+.grid-container {
+  @include mobile {
+    grid-template-columns: 1fr;
+  }
+}
+
+.card {
+  @include mobile {
+    margin: 10px 0;
+  }
+}
+
+.nav {
+  @include mobile {
+    flex-direction: column;
+  }
+}
+
+ul,
+ol {
+  @include mobile {
+    padding-left: 20px;
+  }
+}
+
+a {
+  @include mobile {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+.modal {
+  @include mobile {
+    padding: 10px;
+  }
+}
+
+.sidebar {
+  @include mobile {
+    width: 100%;
+    max-width: 300px;
+  }
+}
+
+.header {
+  @include mobile {
+    padding: 10px;
+  }
+}
+
+.footer {
+  @include mobile {
+    padding: 20px 10px;
+  }
+}
+
+section {
+  @include mobile {
+    padding: 20px 10px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+}
+
+@media (prefers-contrast: high) {
+  * {
+    border: 1px solid currentColor;
+  }
+}

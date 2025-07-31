@@ -24,7 +24,6 @@ export interface Task {
 
 const tasksRef = collection(db, 'tasks');
 
-
 const cleanTaskData = (task: any) => {
   const cleaned: any = {};
   Object.keys(task).forEach(key => {

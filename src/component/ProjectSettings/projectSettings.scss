@@ -42,6 +42,18 @@
     }
   }
 
+  .save-message {
+    background: rgba(34, 197, 94, 0.2);
+    border: 1px solid rgba(34, 197, 94, 0.3);
+    color: #22c55e;
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    text-align: center;
+    font-weight: 500;
+    backdrop-filter: blur(10px);
+  }
+
   .page-content {
     max-width: 800px;
     margin: 0 auto;
@@ -103,6 +115,115 @@
         font-style: italic;
       }
 
+      .members-list {
+        max-height: 200px;
+        overflow-y: auto;
+        border: 1px solid #444;
+        border-radius: 8px;
+        background: #2c2c3e;
+
+        .member-item {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          padding: 12px 16px;
+          border-bottom: 1px solid #444;
+
+          &:last-child {
+            border-bottom: none;
+          }
+
+          .member-info {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+
+            .member-name {
+              font-weight: 500;
+              color: #fff;
+            }
+
+            .member-email {
+              font-size: 0.9rem;
+              color: #aaa;
+            }
+          }
+
+          .member-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+
+            .role-select {
+              background: #333;
+              color: #fff;
+              border: 1px solid #555;
+              border-radius: 4px;
+              padding: 4px 8px;
+              font-size: 0.9rem;
+
+              &:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+              }
+            }
+
+            .remove-member-btn {
+              background: #ef4444;
+              color: white;
+              border: none;
+              border-radius: 4px;
+              padding: 4px 8px;
+              font-size: 0.8rem;
+              cursor: pointer;
+              transition: background-color 0.2s;
+
+              &:hover {
+                background: #dc2626;
+              }
+            }
+          }
+        }
+      }
+
+      .friends-search {
+        margin-bottom: 16px;
+
+        .search-input {
+          width: 100%;
+          padding: 10px 12px;
+          background: #333;
+          border: 1px solid #555;
+          border-radius: 6px;
+          color: #fff;
+          font-size: 0.9rem;
+          margin-bottom: 8px;
+
+          &::placeholder {
+            color: #aaa;
+          }
+
+          &:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+          }
+        }
+
+        .search-stats {
+          font-size: 0.8rem;
+          color: #aaa;
+          text-align: right;
+        }
+      }
+
+      .no-results {
+        color: #aaa;
+        font-style: italic;
+        text-align: center;
+        padding: 20px;
+      }
+
       .friends-list {
         max-height: 200px;
         overflow-y: auto;
@@ -113,39 +234,114 @@
         .friend-item {
           display: flex;
           align-items: center;
+          justify-content: space-between;
           padding: 12px 16px;
           border-bottom: 1px solid #444;
-          cursor: pointer;
-          transition: background-color 0.2s;
 
           &:last-child {
             border-bottom: none;
           }
 
-          &:hover {
-            background: #333;
-          }
-
-          input[type="checkbox"] {
-            margin-right: 12px;
-            width: 18px;
-            height: 18px;
-            accent-color: #4f46e5;
-          }
-
-          .friend-info {
+          .friend-checkbox {
             display: flex;
-            flex-direction: column;
-            gap: 4px;
+            align-items: center;
+            cursor: pointer;
+            flex: 1;
+
+            input[type='checkbox'] {
+              margin-right: 12px;
+              width: 18px;
+              height: 18px;
+              accent-color: #4f46e5;
+            }
+
+            .friend-info {
+              display: flex;
+              flex-direction: column;
+              gap: 4px;
+
+              .friend-name {
+                font-weight: 500;
+                color: #fff;
+              }
+
+              .friend-email {
+                font-size: 0.9rem;
+                color: #aaa;
+              }
+            }
+          }
+
+          .role-select {
+            background: #333;
+            color: #fff;
+            border: 1px solid #555;
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 0.9rem;
+            min-width: 100px;
+          }
+        }
+      }
+
+      .selected-summary {
+        margin-top: 16px;
+        padding: 16px;
+        background: rgba(79, 70, 229, 0.1);
+        border: 1px solid rgba(79, 70, 229, 0.3);
+        border-radius: 8px;
+
+        h4 {
+          margin: 0 0 12px 0;
+          color: #fff;
+          font-size: 1rem;
+        }
+
+        .selected-friends {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 8px;
+
+          .selected-friend {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background: #333;
+            border-radius: 20px;
+            border: 1px solid #555;
 
             .friend-name {
-              font-weight: 500;
+              font-size: 0.9rem;
               color: #fff;
             }
 
-            .friend-email {
-              font-size: 0.9rem;
+            .role-badge {
+              padding: 2px 6px;
+              border-radius: 10px;
+              font-size: 0.7rem;
+              color: white;
+              font-weight: 500;
+            }
+
+            .remove-selected-btn {
+              background: none;
+              border: none;
               color: #aaa;
+              cursor: pointer;
+              font-size: 1.2rem;
+              padding: 0;
+              width: 16px;
+              height: 16px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              border-radius: 50%;
+
+              &:hover {
+                background: rgba(239, 68, 68, 0.2);
+                color: #ef4444;
+              }
             }
           }
         }
@@ -276,4 +472,4 @@
   to {
     transform: rotate(360deg);
   }
-} 
+}

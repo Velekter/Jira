@@ -1,3 +1,7 @@
+@use '../../scss/variables.scss' as *;
+@use '../../scss/mixins.scss' as *;
+@use '../../scss/media_breakpoints.scss' as *;
+
 .create-project {
   background: rgba(30, 41, 59, 0.8);
   backdrop-filter: blur(10px);
@@ -12,6 +16,18 @@
   align-items: center;
   animation: fadeIn 0.3s ease-in-out;
   color: white;
+
+  @include tablet {
+    max-width: 450px;
+    padding: 1.5rem;
+    margin: 3rem auto;
+  }
+
+  @include mobile {
+    max-width: 95%;
+    padding: 1rem;
+    margin: 2rem auto;
+  }
 
   h2 {
     font-size: 1.8rem;
@@ -70,7 +86,7 @@
     flex-direction: column;
     gap: 1.2rem;
 
-    input[type="text"] {
+    input[type='text'] {
       padding: 0.8rem 1rem;
       border-radius: 10px;
       border: 1px solid rgba(96, 165, 250, 0.2);
@@ -115,7 +131,7 @@
           background: rgba(96, 165, 250, 0.1);
         }
 
-        input[type="checkbox"] {
+        input[type='checkbox'] {
           accent-color: #60a5fa;
           width: 18px;
           height: 18px;
@@ -183,6 +199,10 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }

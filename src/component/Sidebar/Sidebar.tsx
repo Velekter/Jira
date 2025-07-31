@@ -1,12 +1,13 @@
 import React, { useRef, useState } from 'react';
 import './sidebar.scss';
-import menuIcon from './img/menu.png';
 import UserAvatar from '../UserAvatar/UserAvatar';
 import { Link, useLocation } from 'react-router-dom';
 import { useProjectContext } from '../../context/ProjectContext';
 import CreateProject from '../CreateProject/CreateProject';
 import Modal from '../Modal/Modal';
 import type { ModalRef } from '../Modal/Modal';
+import { getUserRole, canManageMembers } from '../../lib/roles';
+import menuIcon from './img/menu.png';
 
 interface SidebarProps {
   isOpen: boolean;
@@ -22,10 +23,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, logoutUser }) 
   const location = useLocation();
 
   const userId = localStorage.getItem('userId') ?? '';
+  const userRole = activeProject ? getUserRole(activeProject, userId) : null;
+  const canAccessSettings = canManageMembers(userRole);
 
   const handleProjectDragStart = (e: React.DragEvent<HTMLLIElement>, index: number) => {
     console.log('Drag start triggered for index:', index);
-    
+
     console.log('Starting drag for project:', index);
     setDraggedProjectIndex(index);
     e.dataTransfer.setData('draggedProjectIndex', index.toString());
@@ -51,10 +54,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, logoutUser }) 
   const handleProjectDrop = (e: React.DragEvent<HTMLLIElement>, dropIndex: number) => {
     e.preventDefault();
     console.log('Drop event triggered for index:', dropIndex);
-    
+
     const draggedIndexStr = e.dataTransfer.getData('draggedProjectIndex');
     console.log('Dragged index string:', draggedIndexStr);
-    
+
     if (!draggedIndexStr) {
       console.log('No dragged index found');
       return;
@@ -62,7 +65,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, logoutUser }) 
 
     const draggedIndex = Number(draggedIndexStr);
     console.log('Dragged index number:', draggedIndex);
-    
+
     if (draggedIndex === dropIndex) {
       console.log('Same index, no reordering needed');
       return;
@@ -77,12 +80,19 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, logoutUser }) 
   const isActiveRoute = (path: string) => {
     return location.pathname === path;
   };
-
+ 
   return (
     <div className={`sidebar-container ${isOpen ? 'open' : 'collapsed'}`}>
       <button className="toggle-button" onClick={toggleSidebar}>
-        <img src={menuIcon} alt="menu" />
+        <div className={`burger-menu ${isOpen ? 'open' : ''}`}>
+          <span className="burger-line"></span>
+          <span className="burger-line"></span>
+          <span className="burger-line"></span>
+        </div>
+        <img src={menuIcon} alt="menu" className="menu-icon" />
       </button>
+
+      {isOpen && <div className="sidebar-overlay" onClick={toggleSidebar}></div>}
 
       <div className={`sidebar ${isOpen ? 'open' : 'collapsed-sid'}`}>
         <ul className="navigation-menu">
@@ -98,12 +108,14 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, logoutUser }) 
               {isOpen && <span className="nav-text">Friends</span>}
             </Link>
           </li>
-          <li className={isActiveRoute('/account/settings') ? 'active' : ''}>
-            <Link to="/account/settings">
-              <span className="nav-icon">⚙️</span>
-              {isOpen && <span className="nav-text">Settings</span>}
-            </Link>
-          </li>
+          {canAccessSettings && (
+            <li className={isActiveRoute('/account/settings') ? 'active' : ''}>
+              <Link to="/account/settings">
+                <span className="nav-icon">⚙️</span>
+                {isOpen && <span className="nav-text">Settings</span>}
+              </Link>
+            </li>
+          )}
           <li>
             <button onClick={logoutUser} className="logout-btn">
               <span className="nav-icon">🚪</span>
@@ -128,7 +140,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, logoutUser }) 
                       draggedProjectIndex === index ? 'dragging' : ''
                     } ${dragOverIndex === index ? 'drag-over' : ''}`}
                     data-project-initial={project.name.charAt(0)}
-                    onClick={(e) => {
+                    onClick={e => {
                       e.stopPropagation();
                       setActiveProject(project);
                     }}
@@ -141,13 +153,12 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, logoutUser }) 
                   >
                     <div className="project-info">
                       <span className="project-name">{project.name}</span>
-                      {isOpen && (
-                        project.owner === userId ? (
+                      {isOpen &&
+                        (project.owner === userId ? (
                           <span className="project-owner owned">Owned</span>
                         ) : (
                           <span className="project-owner shared">Shared</span>
-                        )
-                      )}
+                        ))}
                     </div>
                     {isOpen && <span className="drag-handle">⋮⋮</span>}
                   </li>
