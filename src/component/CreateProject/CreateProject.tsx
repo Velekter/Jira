@@ -14,15 +14,16 @@ interface Friend {
 interface CreateProjectProps {
   userId: string;
   setShowCreateProject: (show: boolean) => void;
+  isManualOpen?: boolean; // Додаємо пропс для розрізнення ручного відкриття
 }
 
-const CreateProject: React.FC<CreateProjectProps> = ({ userId, setShowCreateProject }) => {
+const CreateProject: React.FC<CreateProjectProps> = ({ userId, setShowCreateProject, isManualOpen = false }) => {
   const [projectName, setProjectName] = useState('');
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const { refreshProjects } = useProjectContext();
+  const { refreshProjects, projects } = useProjectContext();
 
   useEffect(() => {
     if (!userId) return;
@@ -53,6 +54,22 @@ const CreateProject: React.FC<CreateProjectProps> = ({ userId, setShowCreateProj
     return () => unsubscribe();
   }, [userId]);
 
+  // Додатковий useEffect для відстеження змін в проектах
+  // Закриваємо модальне вікно тільки якщо воно було відкрите автоматично (коли не було проектів)
+  // або після успішного створення проекту
+  useEffect(() => {
+    console.log('CreateProject: projects changed:', projects.length);
+    console.log('CreateProject: isManualOpen:', isManualOpen);
+    
+    // Закриваємо модальне вікно тільки якщо:
+    // 1. Воно було відкрите автоматично (не вручну) і тепер є проекти
+    // 2. Або після успішного створення проекту
+    if (projects.length > 0 && !isManualOpen) {
+      console.log('CreateProject: Projects available and not manual open, closing modal');
+      setShowCreateProject(false);
+    }
+  }, [projects.length, setShowCreateProject, isManualOpen]);
+
   const toggleFriend = (id: string) => {
     setSelectedFriends(prev =>
       prev.includes(id) ? prev.filter(fid => fid !== id) : [...prev, id]
@@ -63,11 +80,26 @@ const CreateProject: React.FC<CreateProjectProps> = ({ userId, setShowCreateProj
     e.preventDefault();
     if (!projectName.trim()) return;
 
-    await createProjectHooks(userId, projectName, selectedFriends);
-
-    await refreshProjects();
-
-    setShowCreateProject(false);
+    try {
+      console.log('Creating project:', projectName);
+      console.log('CreateProject: userId for project creation:', userId);
+      
+      await createProjectHooks(userId, projectName, selectedFriends);
+      
+      console.log('Project created, refreshing projects...');
+      // Оновлюємо проекти
+      await refreshProjects();
+      
+      // Очищаємо форму
+      setProjectName('');
+      setSelectedFriends([]);
+      
+      // Закриваємо модальне вікно після успішного створення проекту
+      setShowCreateProject(false);
+    } catch (error) {
+      console.error('Error creating project:', error);
+      alert('Помилка при створенні проекту. Спробуйте ще раз.');
+    }
   };
 
   if (loading) {

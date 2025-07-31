@@ -33,10 +33,13 @@ const normalizeUpcomingTask = (task: Task) => {
 
 const Account: React.FC = () => {
   const userId = localStorage.getItem('userId') ?? '';
-  const { projects, activeProject } = useProjectContext();
+  console.log('Account: userId from localStorage:', userId);
+  console.log('Account: userId length:', userId.length);
+  
+  const { projects, activeProject, isLoading: projectsLoading, isInitialized } = useProjectContext();
   const { isLoading, isError, error } = useUserData(userId);
 
-  const [showCreateProject, setShowCreateProject] = useState(projects.length === 0);
+  const [showCreateProject, setShowCreateProject] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [statuses, setStatuses] = useState<string[]>([]);
@@ -57,12 +60,20 @@ const Account: React.FC = () => {
   };
 
   useEffect(() => {
-    if (projects.length > 0) {
-      setShowCreateProject(false);
-    } else {
+    console.log('Projects changed:', projects.length, 'projects');
+    console.log('Projects:', projects.map(p => ({ id: p.id, name: p.name })));
+    console.log('isInitialized:', isInitialized);
+    console.log('Current userId in Account:', userId);
+    
+    // Тільки якщо проекти ініціалізовані і немає проектів, показуємо форму створення
+    if (isInitialized && projects.length === 0) {
+      console.log('Showing create project modal (no projects)');
       setShowCreateProject(true);
+    } else if (isInitialized && projects.length > 0) {
+      console.log('Hiding create project modal (projects exist)');
+      setShowCreateProject(false);
     }
-  }, [projects]);
+  }, [projects.length, projects, isInitialized, userId]);
 
   const projectId = activeProject?.id;
 
@@ -315,8 +326,42 @@ const Account: React.FC = () => {
     }
   };
 
-  if (isLoading) return <p>Loading...</p>;
-  if (isError) return <p>Error: {error?.message}</p>;
+  // Додаткова діагностика
+  console.log('Account: Current states - isLoading:', isLoading, 'projectsLoading:', projectsLoading, 'isInitialized:', isInitialized);
+  console.log('Account: Projects count:', projects.length);
+  console.log('Account: isError:', isError, 'error:', error);
+
+  // Перевірка на наявність userId
+  if (!userId) {
+    console.log('Account: No userId found, redirecting to login');
+    return <p>No user ID found. Please log in.</p>;
+  }
+
+  // Показуємо завантаження тільки якщо завантажуються дані користувача або проекти
+  if (isLoading) {
+    console.log('Account: User data loading');
+    return <p>Loading user data...</p>;
+  }
+  
+  if (projectsLoading) {
+    console.log('Account: Projects loading');
+    return <p>Loading projects...</p>;
+  }
+  
+  if (isError) {
+    console.log('Account: User data error');
+    return <p>Error: {error?.message}</p>;
+  }
+
+  // Якщо проекти не ініціалізовані, показуємо завантаження
+  if (!isInitialized) {
+    console.log('Account: Projects not initialized yet');
+    return <p>Initializing projects...</p>;
+  }
+
+  console.log('Account: All loading checks passed, rendering content');
+  console.log('Account: Projects count:', projects.length);
+  console.log('Account: Show create project:', showCreateProject);
 
   const upcomingTasks = tasks.filter(
     t => t.status === 'upcoming' && typeof t.deadline === 'number' && t.deadline > Date.now()
@@ -339,9 +384,9 @@ const Account: React.FC = () => {
         <div className="container">
           {mode === 'current' ? (
             <>
-              {showCreateProject ? (
-                <CreateProject userId={userId} setShowCreateProject={setShowCreateProject} />
-              ) : (
+                             {showCreateProject ? (
+                 <CreateProject userId={userId} isManualOpen={false} setShowCreateProject={setShowCreateProject} />
+               ) : (
                 <div className="kanban">
                   {statuses.map((status, index) => {
                     const board = boards.find(b => b.name === status);

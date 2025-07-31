@@ -126,7 +126,10 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, logoutUser }) 
 
         <div className="project-list">
           <div className="sidebar-divider" />
-          <button className="add-project-btn" onClick={() => modalRef.current?.open()}>
+          <button className="add-project-btn" onClick={() => {
+            console.log('Sidebar: Add Project button clicked');
+            modalRef.current?.open();
+          }}>
             <span className="btn-icon">+</span>
             {isOpen && <span className="btn-text">Add Project</span>}
           </button>
@@ -169,7 +172,17 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, logoutUser }) 
         </div>
 
         <Modal ref={modalRef}>
-          <CreateProject userId={userId} setShowCreateProject={() => modalRef.current?.close()} />
+          <CreateProject 
+            userId={userId} 
+            isManualOpen={true}
+            setShowCreateProject={(show: boolean) => {
+              console.log('Sidebar: setShowCreateProject called with:', show);
+              if (!show) {
+                console.log('Sidebar: Closing modal');
+                modalRef.current?.close();
+              }
+            }} 
+          />
         </Modal>
 
         <UserAvatar collapsed={!isOpen} />
