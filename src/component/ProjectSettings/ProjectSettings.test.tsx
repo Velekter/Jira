@@ -1,9 +1,8 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { vi, describe, test, expect, beforeEach } from 'vitest';
 import ProjectSettings from './ProjectSettings';
 
-// Mock react-router-dom
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual<any>('react-router-dom');
@@ -13,7 +12,6 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-// Mock ProjectContext
 const mockRefreshProjects = vi.fn();
 const mockProjectContext: {
   activeProject: any;
@@ -27,7 +25,6 @@ vi.mock('../../context/ProjectContext', () => ({
   useProjectContext: () => mockProjectContext,
 }));
 
-// Mock Firebase
 vi.mock('../../lib/firebase', () => ({
   db: {},
 }));
@@ -39,7 +36,6 @@ vi.mock('firebase/firestore', () => ({
   deleteDoc: vi.fn(),
 }));
 
-// Mock roles
 vi.mock('../../lib/roles', () => ({
   ROLE_LABELS: {
     owner: 'Owner',
@@ -77,22 +73,28 @@ describe('ProjectSettings component', () => {
     mockNavigate.mockClear();
     mockRefreshProjects.mockClear();
     vi.clearAllMocks();
-    
-    // Mock localStorage
+
     Object.defineProperty(window, 'localStorage', {
       value: {
         getItem: vi.fn(() => 'test-user-id'),
       },
       writable: true,
     });
+
+    Object.defineProperty(window, 'alert', {
+      value: vi.fn(),
+      writable: true,
+    });
   });
 
   describe('when no active project', () => {
-    test('shows alert and navigates to account', () => {
+    test('shows alert and navigates to account', async () => {
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
       mockProjectContext.activeProject = null;
 
-      renderProjectSettings();
+      await act(async () => {
+        renderProjectSettings();
+      });
 
       expect(alertSpy).toHaveBeenCalledWith('Error: No project selected');
       expect(mockNavigate).toHaveBeenCalledWith('/account');
@@ -113,33 +115,45 @@ describe('ProjectSettings component', () => {
       };
     });
 
-    test('renders project settings title', () => {
-      renderProjectSettings();
+    test('renders project settings title', async () => {
+      await act(async () => {
+        renderProjectSettings();
+      });
       expect(screen.getByText('Project Settings')).toBeInTheDocument();
     });
 
-    test('renders project name input', () => {
-      renderProjectSettings();
+    test('renders project name input', async () => {
+      await act(async () => {
+        renderProjectSettings();
+      });
       expect(screen.getByDisplayValue('Test Project')).toBeInTheDocument();
     });
 
-    test('renders current members section', () => {
-      renderProjectSettings();
+    test('renders current members section', async () => {
+      await act(async () => {
+        renderProjectSettings();
+      });
       expect(screen.getByText('Current Members')).toBeInTheDocument();
     });
 
-    test('renders add friends section', () => {
-      renderProjectSettings();
+    test('renders add friends section', async () => {
+      await act(async () => {
+        renderProjectSettings();
+      });
       expect(screen.getByText('Add Friends')).toBeInTheDocument();
     });
 
-    test('renders save changes button', () => {
-      renderProjectSettings();
+    test('renders save changes button', async () => {
+      await act(async () => {
+        renderProjectSettings();
+      });
       expect(screen.getByRole('button', { name: /save changes/i })).toBeInTheDocument();
     });
 
-    test('renders cancel button', () => {
-      renderProjectSettings();
+    test('renders cancel button', async () => {
+      await act(async () => {
+        renderProjectSettings();
+      });
       expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument();
     });
   });

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import { vi, describe, test, expect, beforeEach, beforeAll } from 'vitest';
 import CreateProject from './CreateProject';
 import * as firestore from 'firebase/firestore';
@@ -43,35 +43,46 @@ describe('CreateProject component', () => {
     vi.clearAllMocks();
   });
 
-  test('renders loading state initially', () => {
-    renderCreateProject();
+  test('renders loading state initially', async () => {
+    await act(async () => {
+      renderCreateProject();
+    });
     expect(screen.getByText('Loading friends...')).toBeInTheDocument();
   });
 
   test('renders create project form after loading', async () => {
     const mockUnsubscribe = vi.fn();
-    (firestore.onSnapshot as any).mockImplementation((docRef, callback) => {
+    (firestore.onSnapshot as any).mockImplementation((docRef: any, callback: any) => {
       callback({
         exists: () => true,
         data: () => ({
           friends: {
-            '1': true,
-            '2': true,
+            'friend-1': true,
+            'friend-2': true,
           },
         }),
       });
       return mockUnsubscribe;
     });
-    (firestore.getDoc as any).mockResolvedValue({
-      exists: () => true,
-      id: '1',
-      data: () => ({
-        id: '1',
-        fullName: 'John Doe',
-        email: 'john@example.com',
-      }),
+    
+    let callCount = 0;
+    (firestore.getDoc as any).mockImplementation(() => {
+      callCount++;
+      return Promise.resolve({
+        exists: () => true,
+        id: `friend-${callCount}`,
+        data: () => ({
+          id: `friend-${callCount}`,
+          fullName: `Friend ${callCount}`,
+          email: `friend${callCount}@example.com`,
+        }),
+      });
     });
-    renderCreateProject();
+
+    await act(async () => {
+      renderCreateProject();
+    });
+    
     await screen.findByText('Create a New Project');
     expect(screen.getByPlaceholderText('Project name')).toBeInTheDocument();
     expect(screen.getByText('Select Friends')).toBeInTheDocument();
@@ -79,14 +90,18 @@ describe('CreateProject component', () => {
   });
 
   test('shows no friends message when user has no friends', async () => {
-    (firestore.onSnapshot as any).mockImplementation((docRef, callback) => {
+    (firestore.onSnapshot as any).mockImplementation((docRef: any, callback: any) => {
       callback({
         exists: () => true,
         data: () => ({ friends: {} }),
       });
       return vi.fn();
     });
-    renderCreateProject();
+    
+    await act(async () => {
+      renderCreateProject();
+    });
+    
     await screen.findByText("You don't have any friends yet.");
     expect(screen.getByText('Add friends first to collaborate on projects!')).toBeInTheDocument();
   });

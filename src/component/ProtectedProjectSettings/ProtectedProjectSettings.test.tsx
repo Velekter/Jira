@@ -1,9 +1,8 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { vi, describe, test, expect, beforeEach } from 'vitest';
 import ProtectedProjectSettings from './ProtectedProjectSettings';
 
-// Mock react-router-dom
 const mockNavigate = vi.fn();
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual<any>('react-router-dom');
@@ -13,7 +12,6 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-// Mock ProjectContext
 const mockProjectContext: {
   activeProject: any;
 } = {
@@ -24,12 +22,10 @@ vi.mock('../../context/ProjectContext', () => ({
   useProjectContext: () => mockProjectContext,
 }));
 
-// Mock roles
 vi.mock('../../lib/roles', () => ({
   getUserRole: vi.fn(() => 'editor'),
 }));
 
-// Mock ProjectSettings component
 vi.mock('../ProjectSettings/ProjectSettings', () => ({
   default: () => <div data-testid="project-settings">Project Settings Component</div>,
 }));
@@ -45,31 +41,39 @@ describe('ProtectedProjectSettings component', () => {
   beforeEach(() => {
     mockNavigate.mockClear();
     vi.clearAllMocks();
-    
-    // Mock localStorage
+
     Object.defineProperty(window, 'localStorage', {
       value: {
         getItem: vi.fn(() => 'test-user-id'),
       },
       writable: true,
     });
+
+    Object.defineProperty(window, 'alert', {
+      value: vi.fn(),
+      writable: true,
+    });
   });
 
   describe('when no active project', () => {
-    test('shows alert and navigates to account', () => {
+    test('shows alert and navigates to account', async () => {
       const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
       mockProjectContext.activeProject = null;
 
-      renderProtectedProjectSettings();
+      await act(async () => {
+        renderProtectedProjectSettings();
+      });
 
       expect(alertSpy).toHaveBeenCalledWith('Error: No project selected');
       expect(mockNavigate).toHaveBeenCalledWith('/account');
       alertSpy.mockRestore();
     });
 
-    test('shows loading state', () => {
+    test('shows loading state', async () => {
       mockProjectContext.activeProject = null;
-      renderProtectedProjectSettings();
+      await act(async () => {
+        renderProtectedProjectSettings();
+      });
       expect(screen.getByText('Loading...')).toBeInTheDocument();
     });
   });
@@ -87,13 +91,17 @@ describe('ProtectedProjectSettings component', () => {
       };
     });
 
-    test('renders ProjectSettings component', () => {
-      renderProtectedProjectSettings();
+    test('renders ProjectSettings component', async () => {
+      await act(async () => {
+        renderProtectedProjectSettings();
+      });
       expect(screen.getByTestId('project-settings')).toBeInTheDocument();
     });
 
-    test('does not show loading state', () => {
-      renderProtectedProjectSettings();
+    test('does not show loading state', async () => {
+      await act(async () => {
+        renderProtectedProjectSettings();
+      });
       expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
     });
   });
