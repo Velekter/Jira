@@ -16,7 +16,6 @@ const ProtectedProjectSettings: React.FC = () => {
       return;
     }
 
-    // Перевіряємо, чи користувач є учасником проекту
     const userRole = getUserRole(activeProject, userId);
     if (!userRole) {
       alert('Error: You are not a member of this project.');

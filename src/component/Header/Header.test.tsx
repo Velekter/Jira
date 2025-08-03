@@ -4,7 +4,6 @@ import { MemoryRouter } from 'react-router-dom';
 import { vi, describe, test, expect, beforeEach } from 'vitest';
 import Header from './Header';
 
-// Mock ProjectContext
 const mockProjectContext: {
   activeProject: any;
 } = {
@@ -15,14 +14,12 @@ vi.mock('../../context/ProjectContext', () => ({
   useProjectContext: () => mockProjectContext,
 }));
 
-// Mock roles
 vi.mock('../../lib/roles', () => ({
   getUserRole: vi.fn(() => 'admin'),
   canManageMembers: vi.fn(() => true),
   canEditProject: vi.fn(() => true),
 }));
 
-// Mock Modal components
 vi.mock('../AddBoardModal/AddBoardModal', () => ({
   default: ({ ref }: any) => {
     if (ref) {
@@ -66,8 +63,7 @@ const renderHeader = (props = {}) => {
 describe('Header component', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    
-    // Mock localStorage
+
     Object.defineProperty(window, 'localStorage', {
       value: {
         getItem: vi.fn(() => 'test-user-id'),

@@ -14,7 +14,7 @@ interface Friend {
 interface CreateProjectProps {
   userId: string;
   setShowCreateProject: (show: boolean) => void;
-  isManualOpen?: boolean; // Додаємо пропс для розрізнення ручного відкриття
+  isManualOpen?: boolean; 
 }
 
 const CreateProject: React.FC<CreateProjectProps> = ({ userId, setShowCreateProject, isManualOpen = false }) => {
@@ -54,16 +54,10 @@ const CreateProject: React.FC<CreateProjectProps> = ({ userId, setShowCreateProj
     return () => unsubscribe();
   }, [userId]);
 
-  // Додатковий useEffect для відстеження змін в проектах
-  // Закриваємо модальне вікно тільки якщо воно було відкрите автоматично (коли не було проектів)
-  // або після успішного створення проекту
   useEffect(() => {
     console.log('CreateProject: projects changed:', projects.length);
     console.log('CreateProject: isManualOpen:', isManualOpen);
     
-    // Закриваємо модальне вікно тільки якщо:
-    // 1. Воно було відкрите автоматично (не вручну) і тепер є проекти
-    // 2. Або після успішного створення проекту
     if (projects.length > 0 && !isManualOpen) {
       console.log('CreateProject: Projects available and not manual open, closing modal');
       setShowCreateProject(false);
@@ -87,18 +81,16 @@ const CreateProject: React.FC<CreateProjectProps> = ({ userId, setShowCreateProj
       await createProjectHooks(userId, projectName, selectedFriends);
       
       console.log('Project created, refreshing projects...');
-      // Оновлюємо проекти
+
       await refreshProjects();
-      
-      // Очищаємо форму
+
       setProjectName('');
       setSelectedFriends([]);
-      
-      // Закриваємо модальне вікно після успішного створення проекту
+
       setShowCreateProject(false);
     } catch (error) {
       console.error('Error creating project:', error);
-      alert('Помилка при створенні проекту. Спробуйте ще раз.');
+      alert('Error creating project. Please try again');
     }
   };
 

@@ -60,9 +60,7 @@ const ProjectSettings: React.FC<ProjectSettingsProps> = () => {
 
     if (activeProject) {
       setProjectName(activeProject.name);
-      // Завантажуємо учасників для всіх ролей, щоб вони могли бачити список
       loadCurrentMembers();
-      // Завантажуємо друзів тільки якщо користувач має права адміністратора
       if (canManageMembers(userRole)) {
         loadAvailableFriends();
       }
@@ -188,7 +186,6 @@ const ProjectSettings: React.FC<ProjectSettingsProps> = () => {
   const removeMember = async (memberId: string) => {
     if (!activeProject) return;
 
-    // Перевіряємо, чи не є користувач власником проекту
     const memberToRemove = activeProject.memberRoles.find(member => member.userId === memberId);
     if (memberToRemove?.role === 'owner') {
       alert('Cannot remove the project owner. The owner can only delete the project.');
@@ -275,8 +272,7 @@ const ProjectSettings: React.FC<ProjectSettingsProps> = () => {
     try {
       setLeaving(true);
       const projectRef = doc(db, 'projects', activeProject.id);
-      
-      // Видаляємо користувача з списку учасників
+
       const updatedMembers = activeProject.members.filter(id => id !== currentUserId);
       const updatedMemberRoles = activeProject.memberRoles.filter(
         member => member.userId !== currentUserId

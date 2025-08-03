@@ -103,7 +103,6 @@ export const ProjectProvider: React.FC<{ userId: string; children: React.ReactNo
           console.log('Setting projects:', orderedProjects.length);
           setProjects(orderedProjects);
 
-          // Якщо є проекти, вибираємо активний
           if (orderedProjects.length > 0) {
             const lastId = localStorage.getItem('activeProjectId');
             const found = orderedProjects.find(p => p.id === lastId) || orderedProjects[0] || null;
@@ -123,15 +122,14 @@ export const ProjectProvider: React.FC<{ userId: string; children: React.ReactNo
           setError(null);
           setIsLoading(false);
           setIsInitialized(true);
-          
-          // Додатково логуємо для діагностики
+
           console.log('Projects context initialized with', orderedProjects.length, 'projects');
         },
         error => {
           console.error('Error listening to projects:', error);
           setError(error.message);
           setIsLoading(false);
-          setIsInitialized(true); // Важливо встановити true навіть при помилці
+          setIsInitialized(true);
         }
       );
 
@@ -140,7 +138,7 @@ export const ProjectProvider: React.FC<{ userId: string; children: React.ReactNo
       console.error('Error in refreshProjects:', e);
       setError(e.message);
       setIsLoading(false);
-      setIsInitialized(true); // Важливо встановити true навіть при помилці
+      setIsInitialized(true);
     }
   };
 

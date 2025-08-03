@@ -65,7 +65,6 @@ const Account: React.FC = () => {
     console.log('isInitialized:', isInitialized);
     console.log('Current userId in Account:', userId);
     
-    // Тільки якщо проекти ініціалізовані і немає проектів, показуємо форму створення
     if (isInitialized && projects.length === 0) {
       console.log('Showing create project modal (no projects)');
       setShowCreateProject(true);
@@ -326,18 +325,15 @@ const Account: React.FC = () => {
     }
   };
 
-  // Додаткова діагностика
   console.log('Account: Current states - isLoading:', isLoading, 'projectsLoading:', projectsLoading, 'isInitialized:', isInitialized);
   console.log('Account: Projects count:', projects.length);
   console.log('Account: isError:', isError, 'error:', error);
 
-  // Перевірка на наявність userId
   if (!userId) {
     console.log('Account: No userId found, redirecting to login');
     return <p>No user ID found. Please log in.</p>;
   }
 
-  // Показуємо завантаження тільки якщо завантажуються дані користувача або проекти
   if (isLoading) {
     console.log('Account: User data loading');
     return <p>Loading user data...</p>;
@@ -353,7 +349,6 @@ const Account: React.FC = () => {
     return <p>Error: {error?.message}</p>;
   }
 
-  // Якщо проекти не ініціалізовані, показуємо завантаження
   if (!isInitialized) {
     console.log('Account: Projects not initialized yet');
     return <p>Initializing projects...</p>;
