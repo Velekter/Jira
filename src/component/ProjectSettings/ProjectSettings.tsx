@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { doc, getDoc, updateDoc, deleteDoc } from 'firebase/firestore';
 import { db } from '../../lib/firebase';
 import { useProjectContext } from '../../context/ProjectContext';
-import type { ProjectRole, ProjectMember } from '../../hooks/useProjects';
+import type { ProjectRole } from '../../hooks/useProjects';
 import {
   ROLE_LABELS,
   ROLE_DESCRIPTIONS,
