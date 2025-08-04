@@ -33,8 +33,6 @@ const normalizeUpcomingTask = (task: Task) => {
 
 const Account: React.FC = () => {
   const userId = localStorage.getItem('userId') ?? '';
-  console.log('Account: userId from localStorage:', userId);
-  console.log('Account: userId length:', userId.length);
   
   const { projects, activeProject, isLoading: projectsLoading, isInitialized } = useProjectContext();
   const { isLoading, isError, error } = useUserData(userId);
@@ -60,16 +58,9 @@ const Account: React.FC = () => {
   };
 
   useEffect(() => {
-    console.log('Projects changed:', projects.length, 'projects');
-    console.log('Projects:', projects.map(p => ({ id: p.id, name: p.name })));
-    console.log('isInitialized:', isInitialized);
-    console.log('Current userId in Account:', userId);
-    
     if (isInitialized && projects.length === 0) {
-      console.log('Showing create project modal (no projects)');
       setShowCreateProject(true);
     } else if (isInitialized && projects.length > 0) {
-      console.log('Hiding create project modal (projects exist)');
       setShowCreateProject(false);
     }
   }, [projects.length, projects, isInitialized, userId]);
@@ -96,7 +87,6 @@ const Account: React.FC = () => {
           ...doc.data(),
         })) as Task[];
 
-        console.log('Real-time tasks update:', tasksData);
         setTasks(tasksData);
       },
       error => {
@@ -121,7 +111,6 @@ const Account: React.FC = () => {
           )
           .sort((a, b) => (a.order || 0) - (b.order || 0));
 
-        console.log('Real-time boards update:', boardsData);
         setBoards(boardsData);
         setStatuses(boardsData.map(b => b.name));
       },
@@ -143,7 +132,6 @@ const Account: React.FC = () => {
   }, [projectId, userId]);
 
   const handleDrop = async (taskId: string, newStatus: string) => {
-    console.log('Dropping task:', taskId, 'to status:', newStatus);
 
     if (!activeProject?.id) {
       console.error('Account: No active project ID');
@@ -185,7 +173,6 @@ const Account: React.FC = () => {
     }
 
     function handleTaskCreate(e: CustomEvent) {
-      console.log('Account: Received task create event:', e.detail.newTask);
 
       if (!activeProject?.id) {
         console.error('Account: No active project ID');
@@ -200,7 +187,6 @@ const Account: React.FC = () => {
       }
 
       const normalizedTask = normalizeUpcomingTask(e.detail.newTask);
-      console.log('Account: Normalized task:', normalizedTask);
 
       createTask({
         ...normalizedTask,
@@ -208,7 +194,6 @@ const Account: React.FC = () => {
         createdAt: Date.now(),
       })
         .then(id => {
-          console.log('Account: Task created with ID:', id);
         })
         .catch(error => {
           console.error('Account: Failed to create task:', error);
@@ -273,11 +258,9 @@ const Account: React.FC = () => {
   };
 
   const handleColumnDragStart = (e: React.DragEvent<HTMLDivElement>, index: number) => {
-    console.log('Starting drag for column:', index);
     setDraggedColumnIndex(index);
     e.dataTransfer.setData('draggedColumnIndex', index.toString());
     e.dataTransfer.effectAllowed = 'move';
-    console.log('Column drag data set:', index.toString());
   };
 
   const handleColumnDragEnd = () => {
@@ -288,83 +271,58 @@ const Account: React.FC = () => {
   const handleColumnDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
-    console.log('Column drag over');
   };
 
   const handleColumnDrop = async (e: React.DragEvent<HTMLDivElement>, dropIndex: number) => {
     e.preventDefault();
-    console.log('Column drop event triggered for index:', dropIndex);
 
     const draggedIndexStr = e.dataTransfer.getData('draggedColumnIndex');
-    console.log('Dragged column index string:', draggedIndexStr);
 
     if (!draggedIndexStr) {
-      console.log('No dragged column index found');
       return;
     }
 
     const draggedIndex = Number(draggedIndexStr);
-    console.log('Dragged column index number:', draggedIndex);
 
     if (draggedIndex === dropIndex) {
-      console.log('Same column index, no reordering needed');
       return;
     }
-
-    console.log('Reordering columns:', draggedIndex, 'to', dropIndex);
 
     if (activeProject) {
       const currentBoards = [...boards];
       const [dragged] = currentBoards.splice(draggedIndex, 1);
       currentBoards.splice(dropIndex, 0, dragged);
       const boardOrder = currentBoards.map(b => b.id);
-      console.log('Saving board order to database:', boardOrder);
       updateBoardOrder(activeProject.id, boardOrder).catch(error => {
         console.error('Failed to update board order in database:', error);
       });
     }
   };
 
-  console.log('Account: Current states - isLoading:', isLoading, 'projectsLoading:', projectsLoading, 'isInitialized:', isInitialized);
-  console.log('Account: Projects count:', projects.length);
-  console.log('Account: isError:', isError, 'error:', error);
-
   if (!userId) {
-    console.log('Account: No userId found, redirecting to login');
     return <p>No user ID found. Please log in.</p>;
   }
 
   if (isLoading) {
-    console.log('Account: User data loading');
     return <p>Loading user data...</p>;
   }
   
   if (projectsLoading) {
-    console.log('Account: Projects loading');
     return <p>Loading projects...</p>;
   }
   
   if (isError) {
-    console.log('Account: User data error');
     return <p>Error: {error?.message}</p>;
   }
 
   if (!isInitialized) {
-    console.log('Account: Projects not initialized yet');
     return <p>Initializing projects...</p>;
   }
-
-  console.log('Account: All loading checks passed, rendering content');
-  console.log('Account: Projects count:', projects.length);
-  console.log('Account: Show create project:', showCreateProject);
 
   const upcomingTasks = tasks.filter(
     t => t.status === 'upcoming' && typeof t.deadline === 'number' && t.deadline > Date.now()
   );
   const currentTasks = tasks.filter(task => task.status !== 'upcoming');
-
-  console.log('Current tasks:', currentTasks);
-  console.log('Upcoming tasks:', upcomingTasks);
 
   return (
     <>

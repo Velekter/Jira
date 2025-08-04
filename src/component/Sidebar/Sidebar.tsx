@@ -27,9 +27,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, logoutUser }) 
   const canAccessSettings = canManageMembers(userRole);
 
   const handleProjectDragStart = (e: React.DragEvent<HTMLLIElement>, index: number) => {
-    console.log('Drag start triggered for index:', index);
-
-    console.log('Starting drag for project:', index);
     setDraggedProjectIndex(index);
     e.dataTransfer.setData('draggedProjectIndex', index.toString());
     e.dataTransfer.effectAllowed = 'move';
@@ -44,7 +41,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, logoutUser }) 
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
     setDragOverIndex(index);
-    console.log('Drag over project:', index);
   };
 
   const handleProjectDragLeave = () => {
@@ -53,25 +49,18 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, logoutUser }) 
 
   const handleProjectDrop = (e: React.DragEvent<HTMLLIElement>, dropIndex: number) => {
     e.preventDefault();
-    console.log('Drop event triggered for index:', dropIndex);
 
     const draggedIndexStr = e.dataTransfer.getData('draggedProjectIndex');
-    console.log('Dragged index string:', draggedIndexStr);
 
     if (!draggedIndexStr) {
-      console.log('No dragged index found');
       return;
     }
 
     const draggedIndex = Number(draggedIndexStr);
-    console.log('Dragged index number:', draggedIndex);
 
     if (draggedIndex === dropIndex) {
-      console.log('Same index, no reordering needed');
       return;
     }
-
-    console.log('Reordering projects:', draggedIndex, 'to', dropIndex);
 
     reorderProjects(draggedIndex, dropIndex);
     setDragOverIndex(null);
@@ -129,7 +118,6 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, logoutUser }) 
         <div className="project-list">
           <div className="sidebar-divider" />
           <button className="add-project-btn" onClick={() => {
-            console.log('Sidebar: Add Project button clicked');
             modalRef.current?.open();
           }}>
             <span className="btn-icon">+</span>
@@ -178,9 +166,7 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, toggleSidebar, logoutUser }) 
             userId={userId} 
             isManualOpen={true}
             setShowCreateProject={(show: boolean) => {
-              console.log('Sidebar: setShowCreateProject called with:', show);
               if (!show) {
-                console.log('Sidebar: Closing modal');
                 modalRef.current?.close();
               }
             }} 

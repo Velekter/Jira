@@ -282,7 +282,7 @@ const ProjectSettings: React.FC<ProjectSettingsProps> = () => {
         members: updatedMembers,
         memberRoles: updatedMemberRoles,
       });
-      
+
       await refreshProjects();
       navigate('/account');
     } catch (error) {
@@ -313,7 +313,11 @@ const ProjectSettings: React.FC<ProjectSettingsProps> = () => {
       setDeleting(true);
       const projectRef = doc(db, 'projects', activeProject.id);
       await deleteDoc(projectRef);
+      
+      localStorage.removeItem('activeProjectId');
       await refreshProjects();
+      
+      navigate('/account');
     } catch (error) {
       console.error('Error deleting project:', error);
       alert('Error deleting project. Please try again.');
@@ -332,9 +336,7 @@ const ProjectSettings: React.FC<ProjectSettingsProps> = () => {
         <button className="back-btn" onClick={() => (window.location.href = '/account')}>
           ← Back
         </button>
-        <h1>
-          {canManageMembers(userRole) ? 'Project Settings' : 'Project Information'}
-        </h1>
+        <h1>{canManageMembers(userRole) ? 'Project Settings' : 'Project Information'}</h1>
       </div>
       {saveMessage && <div className="save-message">{saveMessage}</div>}
       <div className="page-content">
@@ -363,7 +365,9 @@ const ProjectSettings: React.FC<ProjectSettingsProps> = () => {
                     <div className="member-actions">
                       <select
                         value={member.role}
-                        onChange={e => updateMemberRole(member.userId, e.target.value as ProjectRole)}
+                        onChange={e =>
+                          updateMemberRole(member.userId, e.target.value as ProjectRole)
+                        }
                         disabled={
                           member.userId === currentUserId ||
                           !canManageMembers(getUserRole(activeProject, currentUserId))
@@ -436,7 +440,9 @@ const ProjectSettings: React.FC<ProjectSettingsProps> = () => {
                           {selectedFriends.includes(friend.id) && (
                             <select
                               value={selectedRoles[friend.id] || 'viewer'}
-                              onChange={e => updateFriendRole(friend.id, e.target.value as ProjectRole)}
+                              onChange={e =>
+                                updateFriendRole(friend.id, e.target.value as ProjectRole)
+                              }
                               className="role-select"
                             >
                               {Object.entries(ROLE_LABELS).map(([role, label]) => (
@@ -485,58 +491,63 @@ const ProjectSettings: React.FC<ProjectSettingsProps> = () => {
           </>
         )}
 
-                 {!canManageMembers(userRole) && (
-           <>
-             <div className="setting-section">
-               <h3>Project Information</h3>
-               <div className="project-info-readonly">
-                 <p><strong>Project Name:</strong> {activeProject.name}</p>
-                 <p><strong>Your Role:</strong> 
-                   <span 
-                     className="role-badge" 
-                     style={{ backgroundColor: ROLE_COLORS[userRole || 'viewer'] }}
-                   >
-                     {ROLE_LABELS[userRole || 'viewer']}
-                   </span>
-                 </p>
-                 <p><strong>Role Description:</strong> {ROLE_DESCRIPTIONS[userRole || 'viewer']}</p>
-               </div>
-             </div>
+        {!canManageMembers(userRole) && (
+          <>
+            <div className="setting-section">
+              <h3>Project Information</h3>
+              <div className="project-info-readonly">
+                <p>
+                  <strong>Project Name:</strong> {activeProject.name}
+                </p>
+                <p>
+                  <strong>Your Role:</strong>
+                  <span
+                    className="role-badge"
+                    style={{ backgroundColor: ROLE_COLORS[userRole || 'viewer'] }}
+                  >
+                    {ROLE_LABELS[userRole || 'viewer']}
+                  </span>
+                </p>
+                <p>
+                  <strong>Role Description:</strong> {ROLE_DESCRIPTIONS[userRole || 'viewer']}
+                </p>
+              </div>
+            </div>
 
-             <div className="setting-section">
-               <h3>Project Members</h3>
-               {loading ? (
-                 <div className="loading-state">
-                   <div className="spinner"></div>
-                   <p>Loading members...</p>
-                 </div>
-               ) : (
-                 <div className="members-list">
-                   {currentMembers.map(member => (
-                     <div key={member.userId} className="member-item">
-                       <div className="member-info">
-                         <span className="member-name">
-                           {member.userId === currentUserId ? 'You' : member.fullName}
-                         </span>
-                         <span className="member-email">
-                           {member.userId === currentUserId ? 'Your email' : member.email}
-                         </span>
-                       </div>
-                       <div className="member-actions">
-                         <span 
-                           className="role-badge" 
-                           style={{ backgroundColor: ROLE_COLORS[member.role] }}
-                         >
-                           {ROLE_LABELS[member.role]}
-                         </span>
-                       </div>
-                     </div>
-                   ))}
-                 </div>
-               )}
-             </div>
-           </>
-         )}
+            <div className="setting-section">
+              <h3>Project Members</h3>
+              {loading ? (
+                <div className="loading-state">
+                  <div className="spinner"></div>
+                  <p>Loading members...</p>
+                </div>
+              ) : (
+                <div className="members-list">
+                  {currentMembers.map(member => (
+                    <div key={member.userId} className="member-item">
+                      <div className="member-info">
+                        <span className="member-name">
+                          {member.userId === currentUserId ? 'You' : member.fullName}
+                        </span>
+                        <span className="member-email">
+                          {member.userId === currentUserId ? 'Your email' : member.email}
+                        </span>
+                      </div>
+                      <div className="member-actions">
+                        <span
+                          className="role-badge"
+                          style={{ backgroundColor: ROLE_COLORS[member.role] }}
+                        >
+                          {ROLE_LABELS[member.role]}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </>
+        )}
 
         {canLeaveProject(userRole) && (
           <div className="setting-section">

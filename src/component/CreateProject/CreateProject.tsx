@@ -55,11 +55,7 @@ const CreateProject: React.FC<CreateProjectProps> = ({ userId, setShowCreateProj
   }, [userId]);
 
   useEffect(() => {
-    console.log('CreateProject: projects changed:', projects.length);
-    console.log('CreateProject: isManualOpen:', isManualOpen);
-    
     if (projects.length > 0 && !isManualOpen) {
-      console.log('CreateProject: Projects available and not manual open, closing modal');
       setShowCreateProject(false);
     }
   }, [projects.length, setShowCreateProject, isManualOpen]);
@@ -75,12 +71,7 @@ const CreateProject: React.FC<CreateProjectProps> = ({ userId, setShowCreateProj
     if (!projectName.trim()) return;
 
     try {
-      console.log('Creating project:', projectName);
-      console.log('CreateProject: userId for project creation:', userId);
-      
       await createProjectHooks(userId, projectName, selectedFriends);
-      
-      console.log('Project created, refreshing projects...');
 
       await refreshProjects();
 

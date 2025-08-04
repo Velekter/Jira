@@ -113,8 +113,7 @@ export default function FriendRequests() {
       const fromData = fromSnap.data();
       const toData = toSnap.data();
 
-      console.log('Before update fromData.friends:', fromData.friends);
-      console.log('Before update toData.friends:', toData.friends);
+      
 
       await updateDoc(doc(db, 'friendRequests', id), { status: 'accepted' });
 
@@ -134,7 +133,7 @@ export default function FriendRequests() {
       ]);
 
       const fromSnapAfter = await getDoc(fromRef);
-      console.log('After update fromData.friends:', fromSnapAfter.data()?.friends);
+      
     } catch (error) {
       console.error('Error in acceptRequest:', error);
     }

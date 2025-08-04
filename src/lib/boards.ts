@@ -25,7 +25,7 @@ export const addBoard = async (projectId: string, name: string, color: string): 
   const maxOrder =
     existingBoards.length > 0 ? Math.max(...existingBoards.map(b => b.order || 0)) : -1;
 
-  console.log('Adding new board with order:', maxOrder + 1, 'for project:', projectId);
+
 
   const docRef = await addDoc(boardsRef, {
     name,
@@ -51,7 +51,7 @@ export async function getBoards(projectId: string): Promise<Board[]> {
 
   boards.sort((a, b) => (a.order || 0) - (b.order || 0));
 
-  console.log('Fetched boards for project:', projectId, boards);
+
 
   return boards;
 }
@@ -67,7 +67,7 @@ export async function updateBoard(projectId: string, boardId: string, updates: P
 }
 
 export async function updateBoardOrder(projectId: string, boardIds: string[]) {
-  console.log('Updating board order for project:', projectId, 'with order:', boardIds);
+
 
   const batch = writeBatch(db);
 
@@ -77,5 +77,5 @@ export async function updateBoardOrder(projectId: string, boardIds: string[]) {
   });
 
   await batch.commit();
-  console.log('Board order updated successfully');
+
 }

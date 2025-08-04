@@ -25,7 +25,6 @@ const DEFAULT_BOARDS = [
 ];
 
 export const fetchProjects = async (userId: string): Promise<Project[]> => {
-  console.log('Fetching projects for user:', userId);
 
   const projectsSnapshot = await getDocs(collection(db, 'projects'));
   const allProjects = projectsSnapshot.docs.map(doc => {
@@ -45,11 +44,7 @@ export const fetchProjects = async (userId: string): Promise<Project[]> => {
     };
   });
 
-  console.log('All projects from collection:', allProjects);
-
   const userProjects = allProjects.filter(project => project.members.includes(userId));
-
-  console.log('User projects:', userProjects);
 
   return userProjects;
 };
@@ -60,7 +55,6 @@ export const createProjectHooks = async (
   friends: string[] = [],
   friendRoles: { [key: string]: ProjectRole } = {}
 ) => {
-  console.log('Creating project with:', { userId, name, friends, friendRoles });
 
   const now = Date.now();
   const memberRoles: ProjectMember[] = [{ userId, role: 'owner', addedAt: now }];
@@ -81,12 +75,8 @@ export const createProjectHooks = async (
     createdAt: now,
   };
 
-  console.log('Project data:', projectData);
-
   const projectRef = await addDoc(collection(db, 'projects'), projectData);
   const projectId = projectRef.id;
-
-  console.log('Created project with ID:', projectId);
 
   const boardsCollection = collection(db, `projects/${projectId}/boards`);
   for (let i = 0; i < DEFAULT_BOARDS.length; i++) {
@@ -99,7 +89,7 @@ export const createProjectHooks = async (
     });
   }
 
-  console.log('Created default boards for project');
+
 
   return projectId;
 };

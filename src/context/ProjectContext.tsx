@@ -26,7 +26,7 @@ export const ProjectProvider: React.FC<{ userId: string; children: React.ReactNo
   userId,
   children,
 }) => {
-  console.log('ProjectProvider: Initializing with userId:', userId);
+
   
   const [projects, setProjects] = useState<ProjectWithBoards[]>([]);
   const [activeProject, setActiveProjectState] = useState<ProjectWithBoards | null>(null);
@@ -36,16 +36,9 @@ export const ProjectProvider: React.FC<{ userId: string; children: React.ReactNo
   const [isInitialized, setIsInitialized] = useState(false);
 
   const refreshProjects = async () => {
-    console.log('refreshProjects: Called with userId:', userId);
-    console.log('refreshProjects: userId type:', typeof userId);
-    console.log('refreshProjects: userId length:', userId?.length);
-    
     if (!userId || userId.trim() === '') {
-      console.log('refreshProjects: No userId provided or empty userId');
       return;
     }
-
-    console.log('Refreshing projects for user:', userId);
 
     if (unsubscribeProjects) {
       unsubscribeProjects();
@@ -62,7 +55,6 @@ export const ProjectProvider: React.FC<{ userId: string; children: React.ReactNo
       const unsubscribe = onSnapshot(
         projectsQuery,
         async snapshot => {
-          console.log('Projects snapshot received:', snapshot.docs.length, 'projects');
           
           const fetched = snapshot.docs.map(doc => {
             const data = doc.data() as {
@@ -81,7 +73,7 @@ export const ProjectProvider: React.FC<{ userId: string; children: React.ReactNo
             };
           });
 
-          console.log('Fetched projects:', fetched.map(p => ({ id: p.id, name: p.name })));
+
 
           const savedOrder = localStorage.getItem('projectOrder');
           let orderedProjects = fetched;
@@ -100,7 +92,7 @@ export const ProjectProvider: React.FC<{ userId: string; children: React.ReactNo
             }
           }
 
-          console.log('Setting projects:', orderedProjects.length);
+
           setProjects(orderedProjects);
 
           if (orderedProjects.length > 0) {
@@ -108,22 +100,21 @@ export const ProjectProvider: React.FC<{ userId: string; children: React.ReactNo
             const found = orderedProjects.find(p => p.id === lastId) || orderedProjects[0] || null;
 
             if (found) {
-              console.log('Selecting project:', found.id);
               await selectProject(found);
             } else {
-              console.log('No project to select');
               setActiveProjectState(null);
+              localStorage.removeItem('activeProjectId');
             }
           } else {
-            console.log('No projects available');
             setActiveProjectState(null);
+            localStorage.removeItem('activeProjectId');
           }
 
           setError(null);
           setIsLoading(false);
           setIsInitialized(true);
 
-          console.log('Projects context initialized with', orderedProjects.length, 'projects');
+
         },
         error => {
           console.error('Error listening to projects:', error);
@@ -143,20 +134,15 @@ export const ProjectProvider: React.FC<{ userId: string; children: React.ReactNo
   };
 
   useEffect(() => {
-    console.log('ProjectContext: useEffect triggered, userId:', userId);
-    console.log('ProjectContext: userId length:', userId?.length);
-    console.log('ProjectContext: userId trimmed:', userId?.trim());
-    
     if (userId && userId.trim() !== '') {
-      console.log('ProjectContext: userId changed, refreshing projects');
       setIsInitialized(false);
       refreshProjects();
     } else {
-      console.log('ProjectContext: No userId or empty userId, setting initialized to true');
       setIsInitialized(true);
       setIsLoading(false);
       setProjects([]);
       setActiveProjectState(null);
+      localStorage.removeItem('activeProjectId');
     }
 
     return () => {
@@ -167,23 +153,17 @@ export const ProjectProvider: React.FC<{ userId: string; children: React.ReactNo
   }, [userId]);
 
   const selectProject = async (project: ProjectWithBoards) => {
-    console.log('Selecting project:', project.id);
     const boards = await getBoards(project.id);
-    console.log('Loaded boards for project:', project.id, boards);
     const updatedProject = { ...project, boards };
     setActiveProjectState(updatedProject);
     localStorage.setItem('activeProjectId', project.id);
   };
 
   const reorderProjects = (draggedIndex: number, dropIndex: number) => {
-    console.log('reorderProjects called with:', draggedIndex, dropIndex);
     setProjects(prev => {
-      console.log('Previous projects:', prev);
       const newProjects = [...prev];
       const [dragged] = newProjects.splice(draggedIndex, 1);
       newProjects.splice(dropIndex, 0, dragged);
-
-      console.log('New projects order:', newProjects);
 
       const projectOrder = newProjects.map(p => p.id);
       localStorage.setItem('projectOrder', JSON.stringify(projectOrder));
@@ -192,7 +172,7 @@ export const ProjectProvider: React.FC<{ userId: string; children: React.ReactNo
     });
   };
 
-  console.log('ProjectProvider: Rendering with states - isLoading:', isLoading, 'isInitialized:', isInitialized, 'projectsCount:', projects.length);
+
   
   return (
     <ProjectContext.Provider

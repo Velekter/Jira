@@ -31,14 +31,6 @@ const TaskModal = forwardRef<TaskModalRef, TaskModalProps>(
 
     useImperativeHandle(ref, () => ({
       open: (taskData?: Task, defaultStatus?: string, readOnlyMode?: boolean) => {
-        console.log(
-          'TaskModal: Opening with taskData:',
-          taskData,
-          'defaultStatus:',
-          defaultStatus,
-          'readOnly:',
-          readOnlyMode
-        );
         if (taskData) {
           setTask(taskData);
           setTitle(taskData.title);
@@ -77,9 +69,7 @@ const TaskModal = forwardRef<TaskModalRef, TaskModalProps>(
         priority,
       };
 
-      console.log('TaskModal: Saving task with data:', baseTask);
-      console.log('TaskModal: Deadline value:', deadline);
-      console.log('TaskModal: Deadline timestamp:', deadline ? new Date(deadline).getTime() : null);
+
 
       if (task) {
         window.dispatchEvent(
@@ -89,7 +79,6 @@ const TaskModal = forwardRef<TaskModalRef, TaskModalProps>(
         );
       } else {
         const projectId = localStorage.getItem('activeProjectId') ?? '';
-        console.log('TaskModal: Using projectId:', projectId);
 
         if (!projectId) {
           console.error('TaskModal: No projectId found in localStorage');

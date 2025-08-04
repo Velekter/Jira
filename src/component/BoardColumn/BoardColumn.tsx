@@ -52,8 +52,6 @@ const BoardColumn: React.FC<BoardColumnProps> = ({
   };
 
   const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
-    console.log('BoardColumn drag start triggered');
-
     const target = e.target as HTMLElement;
     const h3Element = target.closest('h3');
     const buttonsElement = target.closest('.kanban-column-buttons');
@@ -61,21 +59,12 @@ const BoardColumn: React.FC<BoardColumnProps> = ({
     const isHeaderDrag = h3Element || buttonsElement || dragHandleElement;
     const isTaskDrag = target.closest('.kanban-task');
 
-    console.log('Target element:', target);
-    console.log('H3 element:', h3Element);
-    console.log('Buttons element:', buttonsElement);
-    console.log('Drag handle element:', dragHandleElement);
-    console.log('Is header drag:', isHeaderDrag);
-    console.log('Is task drag:', isTaskDrag);
-
     if (isHeaderDrag || (!isTaskDrag && target.closest('.kanban-column'))) {
-      console.log('Starting column drag');
       setIsDragging(true);
       if (onDragStart) {
         onDragStart(e);
       }
     } else if (!isTaskDrag) {
-      console.log('Preventing drag - not from header or task');
       e.preventDefault();
     }
   };
@@ -102,22 +91,17 @@ const BoardColumn: React.FC<BoardColumnProps> = ({
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     setIsDragOver(false);
-    console.log('BoardColumn drop event triggered');
 
     const draggedColumnIndex = e.dataTransfer.getData('draggedColumnIndex');
-    console.log('Dragged column index:', draggedColumnIndex);
 
     if (draggedColumnIndex && onDropColumn) {
-      console.log('Dropping column:', draggedColumnIndex);
       onDropColumn(e);
       return;
     }
 
     const taskId = e.dataTransfer.getData('task-id');
-    console.log('Task ID:', taskId);
 
     if (taskId) {
-      console.log('Dropping task:', taskId, 'to status:', status);
       onDrop(taskId, status);
     }
   };
@@ -153,7 +137,6 @@ const BoardColumn: React.FC<BoardColumnProps> = ({
             <button
               className="add-btn"
               onClick={() => {
-                console.log('BoardColumn: Opening task modal with status:', status);
                 onOpenTaskModal(undefined, status);
               }}
             >
@@ -179,7 +162,6 @@ const BoardColumn: React.FC<BoardColumnProps> = ({
                 e.preventDefault();
                 return;
               }
-              console.log('Starting drag for task:', task.id);
               e.dataTransfer.setData('task-id', task.id!);
               e.stopPropagation();
             }}
